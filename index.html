@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Baby Recipes</title>
+<style>
+  :root {
+    --primary: #f4a261;
+    --primary-dark: #e76f51;
+    --secondary: #2a9d8f;
+    --bg: #fef9f3;
+    --card-bg: #ffffff;
+    --text: #264653;
+    --text-light: #6b7280;
+    --allergen: #e63946;
+    --allergen-bg: #fde8e8;
+    --border: #e5e7eb;
+    --shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  header {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+    padding: 1.5rem 2rem;
+    text-align: center;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+  }
+
+  header h1 { font-size: 1.8rem; font-weight: 700; }
+  header p { opacity: 0.9; margin-top: 0.3rem; font-size: 0.95rem; }
+
+  .container { max-width: 900px; margin: 0 auto; padding: 1.5rem; }
+
+  /* Controls bar */
+  .controls {
+    display: flex; flex-wrap: wrap; gap: 0.75rem;
+    align-items: center; margin-bottom: 1.5rem;
+  }
+
+  .search-box {
+    flex: 1; min-width: 200px;
+    padding: 0.6rem 1rem; border: 2px solid var(--border);
+    border-radius: 25px; font-size: 0.95rem; outline: none;
+    transition: border-color 0.2s;
+  }
+  .search-box:focus { border-color: var(--primary); }
+
+  .btn {
+    padding: 0.6rem 1.2rem; border: none; border-radius: 25px;
+    font-size: 0.9rem; font-weight: 600; cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .btn:hover { transform: translateY(-1px); box-shadow: var(--shadow); }
+  .btn:active { transform: translateY(0); }
+
+  .btn-primary { background: var(--primary); color: white; }
+  .btn-secondary { background: var(--secondary); color: white; }
+  .btn-danger { background: var(--allergen); color: white; }
+  .btn-outline {
+    background: transparent; border: 2px solid var(--border);
+    color: var(--text);
+  }
+  .btn-outline.active { border-color: var(--secondary); background: var(--secondary); color: white; }
+  .btn-sm { padding: 0.35rem 0.75rem; font-size: 0.8rem; }
+
+  /* Filter tags */
+  .filter-section { margin-bottom: 1.5rem; }
+  .filter-section h3 { font-size: 0.85rem; color: var(--text-light); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  .filter-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .filter-tag {
+    padding: 0.3rem 0.7rem; border-radius: 15px; font-size: 0.8rem;
+    cursor: pointer; border: 1.5px solid var(--border); background: white;
+    transition: all 0.15s; user-select: none;
+  }
+  .filter-tag:hover { border-color: var(--secondary); }
+  .filter-tag.active { background: var(--secondary); color: white; border-color: var(--secondary); }
+  .filter-tag.allergen-tag { border-color: #f5c6c6; }
+  .filter-tag.allergen-tag.active { background: var(--allergen); border-color: var(--allergen); }
+
+  /* Recipe cards */
+  .recipe-grid { display: grid; gap: 1rem; }
+
+  .recipe-card {
+    background: var(--card-bg); border-radius: 12px;
+    box-shadow: var(--shadow); overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+  }
+  .recipe-card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
+
+  .recipe-card-header {
+    padding: 1rem 1.2rem; display: flex; justify-content: space-between; align-items: flex-start;
+  }
+  .recipe-card-header h2 { font-size: 1.15rem; font-weight: 600; }
+  .recipe-age { font-size: 0.75rem; background: var(--primary); color: white; padding: 0.2rem 0.6rem; border-radius: 10px; white-space: nowrap; }
+
+  .recipe-card-body { padding: 0 1.2rem 1rem; }
+
+  .ingredient-list { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 0.5rem; }
+  .ingredient-chip {
+    font-size: 0.78rem; padding: 0.2rem 0.55rem;
+    border-radius: 10px; background: #f0f0f0;
+  }
+  .ingredient-chip.allergen {
+    background: var(--allergen-bg); color: var(--allergen);
+    font-weight: 600; border: 1px solid #f5c6c6;
+  }
+
+  .recipe-meta { font-size: 0.8rem; color: var(--text-light); }
+
+  /* Expanded recipe view */
+  .recipe-expanded { display: none; padding: 0 1.2rem 1.2rem; border-top: 1px solid var(--border); margin-top: 0.5rem; }
+  .recipe-expanded.show { display: block; }
+  .recipe-expanded h3 { font-size: 0.95rem; margin: 0.8rem 0 0.4rem; color: var(--text); }
+  .recipe-expanded ul { padding-left: 1.2rem; }
+  .recipe-expanded li { margin-bottom: 0.3rem; font-size: 0.9rem; line-height: 1.5; }
+  .recipe-expanded ol { padding-left: 1.2rem; }
+  .recipe-expanded ol li { margin-bottom: 0.5rem; font-size: 0.9rem; line-height: 1.5; }
+  .recipe-expanded .allergen-warning {
+    background: var(--allergen-bg); border: 1px solid #f5c6c6;
+    border-radius: 8px; padding: 0.6rem 0.8rem; margin-top: 0.8rem;
+    font-size: 0.85rem; color: var(--allergen);
+  }
+  .recipe-expanded .source-link { font-size: 0.8rem; color: var(--secondary); margin-top: 0.5rem; display: block; }
+  .recipe-actions { display: flex; gap: 0.5rem; margin-top: 0.8rem; }
+
+  /* Modal */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+    z-index: 100; justify-content: center; align-items: flex-start;
+    padding: 2rem; overflow-y: auto;
+  }
+  .modal-overlay.show { display: flex; }
+
+  .modal {
+    background: white; border-radius: 16px; width: 100%; max-width: 600px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2); animation: slideUp 0.25s ease;
+  }
+  @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+  .modal-header {
+    padding: 1.2rem 1.5rem; border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .modal-header h2 { font-size: 1.2rem; }
+  .modal-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-light); padding: 0.2rem; }
+
+  .modal-body { padding: 1.5rem; }
+
+  .tab-bar { display: flex; gap: 0; margin-bottom: 1.2rem; border-bottom: 2px solid var(--border); }
+  .tab {
+    padding: 0.6rem 1.2rem; border: none; background: none; font-size: 0.9rem;
+    font-weight: 600; cursor: pointer; color: var(--text-light);
+    border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.2s;
+  }
+  .tab.active { color: var(--primary-dark); border-bottom-color: var(--primary-dark); }
+
+  .form-group { margin-bottom: 1rem; }
+  .form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.3rem; }
+  .form-group input, .form-group textarea, .form-group select {
+    width: 100%; padding: 0.6rem 0.8rem; border: 2px solid var(--border);
+    border-radius: 8px; font-size: 0.9rem; outline: none; font-family: inherit;
+    transition: border-color 0.2s;
+  }
+  .form-group input:focus, .form-group textarea:focus { border-color: var(--primary); }
+  .form-group textarea { min-height: 100px; resize: vertical; }
+  .form-group .hint { font-size: 0.78rem; color: var(--text-light); margin-top: 0.2rem; }
+
+  .checkbox-group { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .checkbox-label {
+    display: flex; align-items: center; gap: 0.3rem; font-size: 0.85rem;
+    padding: 0.3rem 0.6rem; border: 1.5px solid var(--border); border-radius: 8px;
+    cursor: pointer; transition: all 0.15s; user-select: none;
+  }
+  .checkbox-label:has(input:checked) { border-color: var(--allergen); background: var(--allergen-bg); color: var(--allergen); font-weight: 600; }
+  .checkbox-label input { display: none; }
+
+  .import-area {
+    border: 2px dashed var(--border); border-radius: 12px; padding: 2rem;
+    text-align: center; margin-bottom: 1rem;
+  }
+
+  .empty-state {
+    text-align: center; padding: 3rem 1rem; color: var(--text-light);
+  }
+  .empty-state .emoji { font-size: 3rem; margin-bottom: 0.5rem; }
+  .empty-state p { font-size: 0.95rem; }
+
+  /* Export/Import data */
+  .data-actions { text-align: center; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  .data-actions .btn { margin: 0 0.3rem; }
+
+  @media (max-width: 600px) {
+    header h1 { font-size: 1.4rem; }
+    .container { padding: 1rem; }
+    .controls { flex-direction: column; }
+    .search-box { width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Baby Recipes</h1>
+  <p>Healthy meals for our little one</p>
+</header>
+
+<div class="container">
+  <div class="controls">
+    <input type="text" class="search-box" id="searchBox" placeholder="Search recipes or ingredients...">
+    <button class="btn btn-primary" onclick="openAddModal()">+ Add Recipe</button>
+  </div>
+
+  <div class="filter-section" id="filterSection" style="display:none;">
+    <h3>Filter by Ingredient</h3>
+    <div class="filter-tags" id="ingredientFilters"></div>
+  </div>
+
+  <div class="filter-section" id="allergenFilterSection" style="display:none;">
+    <h3>Allergens</h3>
+    <div class="filter-tags" id="allergenFilters"></div>
+  </div>
+
+  <div class="recipe-grid" id="recipeGrid"></div>
+
+  <div class="data-actions">
+    <button class="btn btn-outline btn-sm" onclick="exportRecipes()">Export All</button>
+    <button class="btn btn-outline btn-sm" onclick="document.getElementById('importFile').click()">Import</button>
+    <input type="file" id="importFile" accept=".json" style="display:none" onchange="importRecipes(event)">
+  </div>
+</div>
+
+<!-- Add Recipe Modal -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modalTitle">Add Recipe</h2>
+      <button class="modal-close" onclick="closeModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="tab-bar">
+        <button class="tab active" onclick="switchTab('manual', this)">Manual Entry</button>
+        <button class="tab" onclick="switchTab('url', this)">From URL / Text</button>
+      </div>
+
+      <!-- Manual entry tab -->
+      <div id="tab-manual">
+        <div class="form-group">
+          <label>Recipe Name *</label>
+          <input type="text" id="recipeName" placeholder="e.g., Sweet Potato Puree">
+        </div>
+        <div class="form-group">
+          <label>Age Range</label>
+          <select id="recipeAge">
+            <option value="6+">6+ months</option>
+            <option value="8+">8+ months</option>
+            <option value="10+">10+ months</option>
+            <option value="12+">12+ months</option>
+            <option value="18+">18+ months</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Ingredients *</label>
+          <textarea id="recipeIngredients" placeholder="One ingredient per line, e.g.:&#10;1 sweet potato&#10;1 tbsp olive oil&#10;Pinch of cinnamon"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Steps *</label>
+          <textarea id="recipeSteps" placeholder="One step per line, e.g.:&#10;Peel and dice the sweet potato&#10;Steam for 15 minutes until soft&#10;Mash with olive oil and cinnamon"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Allergens</label>
+          <div class="hint">Auto-detected from ingredients, or select manually:</div>
+          <div class="checkbox-group" id="allergenCheckboxes"></div>
+        </div>
+        <div class="form-group">
+          <label>Notes (optional)</label>
+          <textarea id="recipeNotes" placeholder="Tips, variations, storage info..." style="min-height:60px"></textarea>
+        </div>
+        <button class="btn btn-primary" onclick="saveManualRecipe()" style="width:100%">Save Recipe</button>
+      </div>
+
+      <!-- URL / text import tab -->
+      <div id="tab-url" style="display:none;">
+        <div class="import-area">
+          <p style="font-size:1.5rem; margin-bottom:0.5rem">&#x1F4CB;</p>
+          <p><strong>Paste recipe text or URL</strong></p>
+          <p style="font-size:0.82rem; color:var(--text-light); margin-top:0.3rem">
+            Paste the full recipe text from any website, or a URL to try auto-import
+          </p>
+        </div>
+        <div class="form-group">
+          <label>Recipe URL or Full Text *</label>
+          <textarea id="importInput" placeholder="Paste a URL like https://example.com/recipe/baby-puree&#10;&#10;Or paste the full recipe text:&#10;Sweet Potato Puree&#10;Ingredients: 1 sweet potato, 1 tbsp butter...&#10;Instructions: Peel and dice..." style="min-height:150px"></textarea>
+        </div>
+        <button class="btn btn-secondary" onclick="analyzeImport()" style="width:100%" id="analyzeBtn">Analyze & Import</button>
+        <div id="importPreview" style="display:none; margin-top:1rem;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const COMMON_ALLERGENS = ['Milk/Dairy', 'Eggs', 'Peanuts', 'Tree Nuts', 'Wheat/Gluten', 'Soy', 'Fish', 'Shellfish', 'Sesame'];
+
+const ALLERGEN_KEYWORDS = {
+  'Milk/Dairy': ['milk','cream','butter','cheese','yogurt','yoghurt','ghee','whey','casein','dairy','ricotta','mozzarella','parmesan','cheddar','cottage cheese'],
+  'Eggs': ['egg','eggs','yolk','whites','mayonnaise','mayo'],
+  'Peanuts': ['peanut','peanuts','peanut butter'],
+  'Tree Nuts': ['almond','cashew','walnut','pecan','pistachio','hazelnut','macadamia','brazil nut','pine nut','chestnut'],
+  'Wheat/Gluten': ['wheat','flour','bread','pasta','noodle','couscous','semolina','bulgur','farina','breadcrumb','panko','tortilla','pita','cracker'],
+  'Soy': ['soy','soya','tofu','tempeh','edamame','miso','soy sauce'],
+  'Fish': ['fish','salmon','tuna','cod','tilapia','trout','sardine','anchovy','bass','halibut','haddock','mackerel'],
+  'Shellfish': ['shrimp','prawn','crab','lobster','mussel','clam','oyster','scallop','calamari','squid'],
+  'Sesame': ['sesame','tahini','hummus']
+};
+
+let recipes = JSON.parse(localStorage.getItem('babyRecipes') || '[]');
+let editingId = null;
+let activeIngredientFilters = new Set();
+let activeAllergenFilters = new Set();
+
+// Sample recipes to start with
+if (recipes.length === 0) {
+  recipes = [
+    {
+      id: 1,
+      name: "Sweet Potato Puree",
+      age: "6+",
+      ingredients: ["2 medium sweet potatoes", "1 tbsp olive oil", "Pinch of cinnamon"],
+      steps: ["Peel and dice the sweet potatoes into small cubes.", "Steam for 15 minutes until very soft.", "Blend with olive oil until smooth.", "Add a tiny pinch of cinnamon and mix well.", "Let cool before serving."],
+      allergens: [],
+      notes: "Great first food! Can be frozen in ice cube trays for easy portions.",
+      source: "",
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: 2,
+      name: "Banana Oat Pancakes",
+      age: "8+",
+      ingredients: ["1 ripe banana", "1 egg", "3 tbsp oat flour", "1 tsp butter for cooking"],
+      steps: ["Mash banana in a bowl until smooth.", "Beat in the egg.", "Stir in oat flour until combined.", "Heat butter in a non-stick pan on low-medium heat.", "Drop small spoonfuls and cook 2 min per side.", "Cool and cut into finger-food strips."],
+      allergens: ["Eggs", "Wheat/Gluten", "Milk/Dairy"],
+      notes: "Perfect for baby-led weaning. Soft enough for gums!",
+      source: "",
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: 3,
+      name: "Avocado Salmon Mash",
+      age: "8+",
+      ingredients: ["1/2 ripe avocado", "50g cooked salmon", "Squeeze of lemon juice"],
+      steps: ["Ensure salmon is fully cooked and flake with a fork.", "Mash avocado in a bowl.", "Combine salmon and avocado.", "Add a tiny squeeze of lemon juice.", "Mix until desired consistency."],
+      allergens: ["Fish"],
+      notes: "Great source of omega-3 fatty acids for brain development.",
+      source: "",
+      createdAt: new Date().toISOString()
+    }
+  ];
+  saveToStorage();
+}
+
+function saveToStorage() {
+  localStorage.setItem('babyRecipes', JSON.stringify(recipes));
+}
+
+function getAllIngredients() {
+  const all = new Set();
+  recipes.forEach(r => {
+    r.ingredients.forEach(ing => {
+      const clean = ing.replace(/^[\d\/\.\,\s]+(tbsp|tsp|cup|cups|g|kg|ml|l|oz|lb|pinch|handful|medium|large|small|ripe|cooked|fresh)?\s*/i, '').trim();
+      if (clean) all.add(clean.toLowerCase());
+    });
+  });
+  return [...all].sort();
+}
+
+function getAllAllergens() {
+  const all = new Set();
+  recipes.forEach(r => r.allergens.forEach(a => all.add(a)));
+  return [...all].sort();
+}
+
+function detectAllergens(ingredientText) {
+  const detected = new Set();
+  const lower = ingredientText.toLowerCase();
+  for (const [allergen, keywords] of Object.entries(ALLERGEN_KEYWORDS)) {
+    for (const kw of keywords) {
+      if (lower.includes(kw)) { detected.add(allergen); break; }
+    }
+  }
+  return [...detected];
+}
+
+function isAllergenIngredient(ingredient) {
+  const lower = ingredient.toLowerCase();
+  for (const keywords of Object.values(ALLERGEN_KEYWORDS)) {
+    for (const kw of keywords) {
+      if (lower.includes(kw)) return true;
+    }
+  }
+  return false;
+}
+
+function renderFilters() {
+  const ingredients = getAllIngredients();
+  const allergens = getAllAllergens();
+
+  const filterSection = document.getElementById('filterSection');
+  const allergenSection = document.getElementById('allergenFilterSection');
+
+  if (ingredients.length > 0) {
+    filterSection.style.display = '';
+    document.getElementById('ingredientFilters').innerHTML = ingredients.map(ing =>
+      `<span class="filter-tag ${activeIngredientFilters.has(ing) ? 'active' : ''}" onclick="toggleIngFilter('${ing.replace(/'/g, "\\'")}')">${ing}</span>`
+    ).join('');
+  } else {
+    filterSection.style.display = 'none';
+  }
+
+  if (allergens.length > 0) {
+    allergenSection.style.display = '';
+    document.getElementById('allergenFilters').innerHTML = allergens.map(a =>
+      `<span class="filter-tag allergen-tag ${activeAllergenFilters.has(a) ? 'active' : ''}" onclick="toggleAllergenFilter('${a}')">&#9888; ${a}</span>`
+    ).join('');
+  } else {
+    allergenSection.style.display = 'none';
+  }
+}
+
+function toggleIngFilter(ing) {
+  if (activeIngredientFilters.has(ing)) activeIngredientFilters.delete(ing);
+  else activeIngredientFilters.add(ing);
+  render();
+}
+
+function toggleAllergenFilter(a) {
+  if (activeAllergenFilters.has(a)) activeAllergenFilters.delete(a);
+  else activeAllergenFilters.add(a);
+  render();
+}
+
+function filterRecipes() {
+  const query = document.getElementById('searchBox').value.toLowerCase().trim();
+  return recipes.filter(r => {
+    if (query) {
+      const haystack = (r.name + ' ' + r.ingredients.join(' ') + ' ' + (r.notes || '')).toLowerCase();
+      if (!haystack.includes(query)) return false;
+    }
+    if (activeIngredientFilters.size > 0) {
+      const rIngs = r.ingredients.join(' ').toLowerCase();
+      for (const f of activeIngredientFilters) {
+        if (!rIngs.includes(f)) return false;
+      }
+    }
+    if (activeAllergenFilters.size > 0) {
+      for (const a of activeAllergenFilters) {
+        if (!r.allergens.includes(a)) return false;
+      }
+    }
+    return true;
+  });
+}
+
+function renderRecipes() {
+  const grid = document.getElementById('recipeGrid');
+  const filtered = filterRecipes();
+
+  if (filtered.length === 0) {
+    grid.innerHTML = `
+      <div class="empty-state">
+        <div class="emoji">&#x1F37C;</div>
+        <p>${recipes.length === 0 ? 'No recipes yet. Add your first one!' : 'No recipes match your search.'}</p>
+      </div>`;
+    return;
+  }
+
+  grid.innerHTML = filtered.map(r => `
+    <div class="recipe-card" id="card-${r.id}">
+      <div class="recipe-card-header" onclick="toggleExpand(${r.id})">
+        <div>
+          <h2>${escHtml(r.name)}</h2>
+          <div class="ingredient-list" style="margin-top:0.4rem">
+            ${r.ingredients.map(i => `<span class="ingredient-chip ${isAllergenIngredient(i) ? 'allergen' : ''}">${isAllergenIngredient(i) ? '&#9888; ' : ''}${escHtml(i)}</span>`).join('')}
+          </div>
+        </div>
+        <span class="recipe-age">${escHtml(r.age)} mo</span>
+      </div>
+      <div class="recipe-card-body">
+        ${r.allergens.length > 0 ? `<div class="recipe-meta">&#9888; Contains: ${r.allergens.join(', ')}</div>` : ''}
+      </div>
+      <div class="recipe-expanded" id="expanded-${r.id}">
+        <h3>Ingredients</h3>
+        <ul>${r.ingredients.map(i => `<li>${isAllergenIngredient(i) ? '<strong style="color:var(--allergen)">&#9888; ' + escHtml(i) + '</strong>' : escHtml(i)}</li>`).join('')}</ul>
+        <h3>Steps</h3>
+        <ol>${r.steps.map(s => `<li>${escHtml(s)}</li>`).join('')}</ol>
+        ${r.allergens.length > 0 ? `<div class="allergen-warning">&#9888; <strong>Allergen Alert:</strong> This recipe contains <strong>${r.allergens.join(', ')}</strong>. Introduce one new allergen at a time and watch for reactions for 3-5 days.</div>` : ''}
+        ${r.notes ? `<p style="margin-top:0.6rem; font-size:0.85rem; color:var(--text-light)">&#x1F4A1; ${escHtml(r.notes)}</p>` : ''}
+        ${r.source ? `<a href="${escHtml(r.source)}" target="_blank" rel="noopener" class="source-link">&#x1F517; Original recipe</a>` : ''}
+        <div class="recipe-actions">
+          <button class="btn btn-outline btn-sm" onclick="editRecipe(${r.id}); event.stopPropagation();">Edit</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteRecipe(${r.id}); event.stopPropagation();">Delete</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleExpand(id) {
+  document.getElementById('expanded-' + id).classList.toggle('show');
+}
+
+function render() {
+  renderFilters();
+  renderRecipes();
+}
+
+function escHtml(str) {
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+// Modal
+function openAddModal() {
+  editingId = null;
+  document.getElementById('modalTitle').textContent = 'Add Recipe';
+  clearForm();
+  document.getElementById('addModal').classList.add('show');
+  renderAllergenCheckboxes();
+}
+
+function closeModal() {
+  document.getElementById('addModal').classList.remove('show');
+  editingId = null;
+}
+
+function switchTab(tab, btn) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-manual').style.display = tab === 'manual' ? '' : 'none';
+  document.getElementById('tab-url').style.display = tab === 'url' ? '' : 'none';
+}
+
+function renderAllergenCheckboxes(selected = []) {
+  document.getElementById('allergenCheckboxes').innerHTML = COMMON_ALLERGENS.map(a =>
+    `<label class="checkbox-label"><input type="checkbox" value="${a}" ${selected.includes(a) ? 'checked' : ''}> ${a}</label>`
+  ).join('');
+}
+
+function clearForm() {
+  document.getElementById('recipeName').value = '';
+  document.getElementById('recipeAge').value = '6+';
+  document.getElementById('recipeIngredients').value = '';
+  document.getElementById('recipeSteps').value = '';
+  document.getElementById('recipeNotes').value = '';
+  document.getElementById('importInput').value = '';
+  document.getElementById('importPreview').style.display = 'none';
+  renderAllergenCheckboxes();
+}
+
+function getSelectedAllergens() {
+  return [...document.querySelectorAll('#allergenCheckboxes input:checked')].map(cb => cb.value);
+}
+
+function saveManualRecipe() {
+  const name = document.getElementById('recipeName').value.trim();
+  const age = document.getElementById('recipeAge').value;
+  const ingredientsRaw = document.getElementById('recipeIngredients').value.trim();
+  const stepsRaw = document.getElementById('recipeSteps').value.trim();
+  const notes = document.getElementById('recipeNotes').value.trim();
+  const allergens = getSelectedAllergens();
+
+  if (!name || !ingredientsRaw || !stepsRaw) {
+    alert('Please fill in the recipe name, ingredients, and steps.');
+    return;
+  }
+
+  const ingredients = ingredientsRaw.split('\n').map(s => s.trim()).filter(Boolean);
+  const steps = stepsRaw.split('\n').map(s => s.trim()).filter(Boolean);
+
+  // Auto-detect allergens if none manually selected
+  let finalAllergens = allergens;
+  if (finalAllergens.length === 0) {
+    finalAllergens = detectAllergens(ingredients.join(' '));
+  }
+
+  if (editingId) {
+    const idx = recipes.findIndex(r => r.id === editingId);
+    if (idx >= 0) {
+      recipes[idx] = { ...recipes[idx], name, age, ingredients, steps, allergens: finalAllergens, notes };
+    }
+  } else {
+    recipes.push({
+      id: Date.now(),
+      name, age, ingredients, steps,
+      allergens: finalAllergens,
+      notes, source: '',
+      createdAt: new Date().toISOString()
+    });
+  }
+
+  saveToStorage();
+  closeModal();
+  render();
+}
+
+function editRecipe(id) {
+  const r = recipes.find(x => x.id === id);
+  if (!r) return;
+  editingId = id;
+  document.getElementById('modalTitle').textContent = 'Edit Recipe';
+  document.getElementById('recipeName').value = r.name;
+  document.getElementById('recipeAge').value = r.age;
+  document.getElementById('recipeIngredients').value = r.ingredients.join('\n');
+  document.getElementById('recipeSteps').value = r.steps.join('\n');
+  document.getElementById('recipeNotes').value = r.notes || '';
+  renderAllergenCheckboxes(r.allergens);
+  document.querySelectorAll('.tab')[0].click();
+  document.getElementById('addModal').classList.add('show');
+}
+
+function deleteRecipe(id) {
+  if (!confirm('Delete this recipe?')) return;
+  recipes = recipes.filter(r => r.id !== id);
+  saveToStorage();
+  render();
+}
+
+// URL / text import
+function analyzeImport() {
+  const input = document.getElementById('importInput').value.trim();
+  if (!input) { alert('Please paste a URL or recipe text.'); return; }
+
+  const btn = document.getElementById('analyzeBtn');
+  btn.disabled = true;
+  btn.textContent = 'Analyzing...';
+
+  if (/^https?:\/\//i.test(input)) {
+    fetchRecipeFromUrl(input);
+  } else {
+    parseRecipeText(input);
+    btn.disabled = false;
+    btn.textContent = 'Analyze & Import';
+  }
+}
+
+async function fetchRecipeFromUrl(url) {
+  const btn = document.getElementById('analyzeBtn');
+  try {
+    const proxies = [
+      'https://api.allorigins.win/raw?url=',
+      'https://corsproxy.io/?'
+    ];
+
+    let html = null;
+    for (const proxy of proxies) {
+      try {
+        const resp = await fetch(proxy + encodeURIComponent(url), { signal: AbortSignal.timeout(10000) });
+        if (resp.ok) { html = await resp.text(); break; }
+      } catch(e) { continue; }
+    }
+
+    if (!html) {
+      alert('Could not fetch the URL. Please copy the recipe text from the website and paste it here instead.');
+      btn.disabled = false;
+      btn.textContent = 'Analyze & Import';
+      return;
+    }
+
+    const parsed = extractRecipeFromHtml(html, url);
+    if (parsed) {
+      showImportPreview(parsed);
+    } else {
+      alert('Could not find a clear recipe on that page. Please paste the recipe text directly.');
+    }
+  } catch(e) {
+    alert('Error fetching URL. Please paste the recipe text instead.');
+  }
+  btn.disabled = false;
+  btn.textContent = 'Analyze & Import';
+}
+
+function extractRecipeFromHtml(html, url) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+
+  // Try JSON-LD schema first (most recipe sites use this)
+  const scripts = doc.querySelectorAll('script[type="application/ld+json"]');
+  for (const script of scripts) {
+    try {
+      let data = JSON.parse(script.textContent);
+      if (Array.isArray(data)) data = data[0];
+      if (data['@graph']) data = data['@graph'].find(x => x['@type'] === 'Recipe') || data;
+
+      if (data['@type'] === 'Recipe' || (Array.isArray(data['@type']) && data['@type'].includes('Recipe'))) {
+        const ingredients = Array.isArray(data.recipeIngredient) ? data.recipeIngredient : [];
+        let steps = [];
+        if (Array.isArray(data.recipeInstructions)) {
+          steps = data.recipeInstructions.map(s => typeof s === 'string' ? s : s.text || s.name || '').filter(Boolean);
+        } else if (typeof data.recipeInstructions === 'string') {
+          steps = data.recipeInstructions.split(/\.\s+/).filter(Boolean);
+        }
+
+        return {
+          name: data.name || 'Imported Recipe',
+          ingredients,
+          steps,
+          allergens: detectAllergens(ingredients.join(' ')),
+          notes: data.description || '',
+          source: url
+        };
+      }
+    } catch(e) {}
+  }
+
+  // Fallback: extract text
+  const body = doc.body?.textContent || '';
+  if (body.length > 100) {
+    return parseRecipeText(body, url, true);
+  }
+  return null;
+}
+
+function parseRecipeText(text, source = '', returnOnly = false) {
+  const lines = text.split('\n').map(s => s.trim()).filter(Boolean);
+  let name = '';
+  let ingredients = [];
+  let steps = [];
+  let section = 'unknown';
+
+  for (const line of lines) {
+    if (line.length < 80 && !line.match(/^(ingredient|step|instruction|direction|method|preparation)/i)) {
+      if (!name) { name = line.replace(/^#+\s*/, ''); continue; }
+    }
+
+    const lowerLine = line.toLowerCase();
+    if (lowerLine.match(/^(ingredient|what you.?ll need)/i)) { section = 'ingredients'; continue; }
+    if (lowerLine.match(/^(step|instruction|direction|method|preparation|how to make)/i)) { section = 'steps'; continue; }
+
+    if (section === 'unknown') {
+      if (line.match(/^\d+[\.\)]\s/) || line.match(/^(first|then|next|finally)/i)) {
+        section = 'steps';
+      } else if (line.match(/^[\-\*]\s/) || line.match(/^\d+\s*(tbsp|tsp|cup|g|ml|oz)/i)) {
+        section = 'ingredients';
+      }
+    }
+
+    const cleaned = line.replace(/^[\-\*\d\.\)]+\s*/, '');
+    if (section === 'ingredients' && cleaned.length < 100) {
+      ingredients.push(cleaned);
+    } else if (section === 'steps') {
+      steps.push(cleaned);
+    } else if (cleaned.length < 80) {
+      ingredients.push(cleaned);
+    } else {
+      steps.push(cleaned);
+    }
+  }
+
+  if (ingredients.length === 0 && steps.length === 0) {
+    const midpoint = Math.floor(lines.length / 2);
+    ingredients = lines.slice(0, midpoint).map(l => l.replace(/^[\-\*\d\.\)]+\s*/, ''));
+    steps = lines.slice(midpoint).map(l => l.replace(/^[\-\*\d\.\)]+\s*/, ''));
+  }
+
+  const result = {
+    name: name || 'Imported Recipe',
+    ingredients: ingredients.slice(0, 30),
+    steps: steps.slice(0, 20),
+    allergens: detectAllergens(ingredients.join(' ')),
+    notes: '',
+    source: source
+  };
+
+  if (returnOnly) return result;
+  showImportPreview(result);
+  return result;
+}
+
+function showImportPreview(data) {
+  const preview = document.getElementById('importPreview');
+  preview.style.display = '';
+  preview.innerHTML = `
+    <div style="background:#f0faf8; border-radius:10px; padding:1rem; border:1px solid #c8e6e0;">
+      <h3 style="margin-bottom:0.5rem">Preview: ${escHtml(data.name)}</h3>
+      <p style="font-size:0.85rem"><strong>Ingredients (${data.ingredients.length}):</strong> ${data.ingredients.slice(0,5).map(escHtml).join(', ')}${data.ingredients.length > 5 ? '...' : ''}</p>
+      <p style="font-size:0.85rem"><strong>Steps:</strong> ${data.steps.length}</p>
+      ${data.allergens.length > 0 ? `<p style="font-size:0.85rem; color:var(--allergen)"><strong>&#9888; Detected allergens:</strong> ${data.allergens.join(', ')}</p>` : '<p style="font-size:0.85rem; color:var(--secondary)">No common allergens detected</p>'}
+      <div style="display:flex; gap:0.5rem; margin-top:0.8rem;">
+        <button class="btn btn-primary btn-sm" onclick="confirmImport()">Add This Recipe</button>
+        <button class="btn btn-outline btn-sm" onclick="editImported()">Edit First</button>
+      </div>
+    </div>
+  `;
+  preview._data = data;
+}
+
+function confirmImport() {
+  const data = document.getElementById('importPreview')._data;
+  if (!data) return;
+  recipes.push({
+    id: Date.now(),
+    name: data.name, age: '6+',
+    ingredients: data.ingredients, steps: data.steps,
+    allergens: data.allergens, notes: data.notes,
+    source: data.source,
+    createdAt: new Date().toISOString()
+  });
+  saveToStorage();
+  closeModal();
+  render();
+}
+
+function editImported() {
+  const data = document.getElementById('importPreview')._data;
+  if (!data) return;
+  document.getElementById('recipeName').value = data.name;
+  document.getElementById('recipeIngredients').value = data.ingredients.join('\n');
+  document.getElementById('recipeSteps').value = data.steps.join('\n');
+  document.getElementById('recipeNotes').value = data.notes || '';
+  renderAllergenCheckboxes(data.allergens);
+  document.querySelectorAll('.tab')[0].click();
+}
+
+// Export / Import (for sharing between devices)
+function exportRecipes() {
+  const blob = new Blob([JSON.stringify(recipes, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'baby-recipes.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importRecipes(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const imported = JSON.parse(e.target.result);
+      if (!Array.isArray(imported)) { alert('Invalid file format.'); return; }
+      const existingNames = new Set(recipes.map(r => r.name.toLowerCase()));
+      let added = 0;
+      for (const r of imported) {
+        if (!existingNames.has(r.name.toLowerCase())) {
+          recipes.push({ ...r, id: Date.now() + added });
+          added++;
+        }
+      }
+      saveToStorage();
+      render();
+      alert(`Imported ${added} new recipes (${imported.length - added} duplicates skipped).`);
+    } catch(e) {
+      alert('Could not read the file. Make sure it is a valid JSON export.');
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+// Search
+let searchTimeout;
+document.getElementById('searchBox').addEventListener('input', () => {
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(render, 200);
+});
+
+// Close modal on overlay click
+document.getElementById('addModal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeModal();
+});
+
+// Initial render
+render();
+</script>
+</body>
+</html>
