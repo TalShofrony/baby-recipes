@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -101,7 +101,8 @@
   .recipe-card-header {
     padding: 1rem 1.2rem; display: flex; justify-content: space-between; align-items: flex-start;
   }
-  .recipe-card-header h2 { font-size: 1.15rem; font-weight: 600; }
+  .recipe-card-header h2 { font-size: 1.15rem; font-weight: 600; unicode-bidi: plaintext; }
+  [dir="rtl"] { text-align: right; }
   .recipe-age { font-size: 0.75rem; background: var(--primary); color: white; padding: 0.2rem 0.6rem; border-radius: 10px; white-space: nowrap; }
 
   .recipe-card-body { padding: 0 1.2rem 1rem; }
@@ -123,7 +124,7 @@
   .recipe-expanded.show { display: block; }
   .recipe-expanded h3 { font-size: 0.95rem; margin: 0.8rem 0 0.4rem; color: var(--text); }
   .recipe-expanded ul { padding-left: 1.2rem; }
-  .recipe-expanded li { margin-bottom: 0.3rem; font-size: 0.9rem; line-height: 1.5; }
+  .recipe-expanded li { margin-bottom: 0.3rem; font-size: 0.9rem; line-height: 1.5; unicode-bidi: plaintext; }
   .recipe-expanded ol { padding-left: 1.2rem; }
   .recipe-expanded ol li { margin-bottom: 0.5rem; font-size: 0.9rem; line-height: 1.5; }
   .recipe-expanded .allergen-warning {
@@ -313,15 +314,15 @@
 const COMMON_ALLERGENS = ['Milk/Dairy', 'Eggs', 'Peanuts', 'Tree Nuts', 'Wheat/Gluten', 'Soy', 'Fish', 'Shellfish', 'Sesame'];
 
 const ALLERGEN_KEYWORDS = {
-  'Milk/Dairy': ['milk','cream','butter','cheese','yogurt','yoghurt','ghee','whey','casein','dairy','ricotta','mozzarella','parmesan','cheddar','cottage cheese'],
-  'Eggs': ['egg','eggs','yolk','whites','mayonnaise','mayo'],
-  'Peanuts': ['peanut','peanuts','peanut butter'],
-  'Tree Nuts': ['almond','cashew','walnut','pecan','pistachio','hazelnut','macadamia','brazil nut','pine nut','chestnut'],
-  'Wheat/Gluten': ['wheat','flour','bread','pasta','noodle','couscous','semolina','bulgur','farina','breadcrumb','panko','tortilla','pita','cracker'],
-  'Soy': ['soy','soya','tofu','tempeh','edamame','miso','soy sauce'],
-  'Fish': ['fish','salmon','tuna','cod','tilapia','trout','sardine','anchovy','bass','halibut','haddock','mackerel'],
-  'Shellfish': ['shrimp','prawn','crab','lobster','mussel','clam','oyster','scallop','calamari','squid'],
-  'Sesame': ['sesame','tahini','hummus']
+  'Milk/Dairy': ['milk','cream','butter','cheese','yogurt','yoghurt','ghee','whey','casein','dairy','ricotta','mozzarella','parmesan','cheddar','cottage cheese','חלב','שמנת','חמאה','גבינה','יוגורט','שמנת','קוטג','מוצרלה','פרמזן'],
+  'Eggs': ['egg','eggs','yolk','whites','mayonnaise','mayo','ביצה','ביצים','חלמון','חלבון','מיונז'],
+  'Peanuts': ['peanut','peanuts','peanut butter','בוטנים','חמאת בוטנים','בוטן'],
+  'Tree Nuts': ['almond','cashew','walnut','pecan','pistachio','hazelnut','macadamia','brazil nut','pine nut','chestnut','שקד','שקדים','קשיו','אגוז','אגוזים','פקאן','פיסטוק','אגוז לוז','צנובר'],
+  'Wheat/Gluten': ['wheat','flour','bread','pasta','noodle','couscous','semolina','bulgur','farina','breadcrumb','panko','tortilla','pita','cracker','חיטה','קמח','לחם','פסטה','אטריות','קוסקוס','בורגול','פתיתים','פיתה','קרקר'],
+  'Soy': ['soy','soya','tofu','tempeh','edamame','miso','soy sauce','סויה','טופו','אדממה','מיסו','רוטב סויה'],
+  'Fish': ['fish','salmon','tuna','cod','tilapia','trout','sardine','anchovy','bass','halibut','haddock','mackerel','דג','סלמון','טונה','בקלה','טילפיה','פורל','סרדין','אנשובי'],
+  'Shellfish': ['shrimp','prawn','crab','lobster','mussel','clam','oyster','scallop','calamari','squid','שרימפס','חסילון','סרטן','לובסטר','קלמארי','דיונון'],
+  'Sesame': ['sesame','tahini','hummus','שומשום','טחינה','חומוס']
 };
 
 let recipes = JSON.parse(localStorage.getItem('babyRecipes') || '[]');
@@ -487,7 +488,7 @@ function renderRecipes() {
   grid.innerHTML = filtered.map(r => `
     <div class="recipe-card" id="card-${r.id}">
       <div class="recipe-card-header" onclick="toggleExpand(${r.id})">
-        <div>
+        <div dir="auto">
           <h2>${escHtml(r.name)}</h2>
           <div class="ingredient-list" style="margin-top:0.4rem">
             ${r.ingredients.map(i => `<span class="ingredient-chip ${isAllergenIngredient(i) ? 'allergen' : ''}">${isAllergenIngredient(i) ? '&#9888; ' : ''}${escHtml(i)}</span>`).join('')}
@@ -498,7 +499,7 @@ function renderRecipes() {
       <div class="recipe-card-body">
         ${r.allergens.length > 0 ? `<div class="recipe-meta">&#9888; Contains: ${r.allergens.join(', ')}</div>` : ''}
       </div>
-      <div class="recipe-expanded" id="expanded-${r.id}">
+      <div class="recipe-expanded" id="expanded-${r.id}" dir="auto">
         <h3>Ingredients</h3>
         <ul>${r.ingredients.map(i => `<li>${isAllergenIngredient(i) ? '<strong style="color:var(--allergen)">&#9888; ' + escHtml(i) + '</strong>' : escHtml(i)}</li>`).join('')}</ul>
         <h3>Steps</h3>
@@ -658,15 +659,30 @@ async function fetchRecipeFromUrl(url) {
   const btn = document.getElementById('analyzeBtn');
   try {
     const proxies = [
-      'https://api.allorigins.win/raw?url=',
-      'https://corsproxy.io/?'
+      { prefix: 'https://api.allorigins.win/get?url=', json: true },
+      { prefix: 'https://api.allorigins.win/raw?url=', json: false },
+      { prefix: 'https://corsproxy.io/?', json: false },
+      { prefix: 'https://api.codetabs.com/v1/proxy?quest=', json: false }
     ];
 
     let html = null;
     for (const proxy of proxies) {
       try {
-        const resp = await fetch(proxy + encodeURIComponent(url), { signal: AbortSignal.timeout(10000) });
-        if (resp.ok) { html = await resp.text(); break; }
+        const resp = await fetch(proxy.prefix + encodeURIComponent(url), {
+          signal: AbortSignal.timeout(12000),
+          headers: { 'Accept': 'text/html,application/json' }
+        });
+        if (resp.ok) {
+          let text = await resp.text();
+          if (proxy.json) {
+            try { text = JSON.parse(text).contents || text; } catch(e) {}
+          }
+          // Only accept if it looks like real HTML (not an error page)
+          if (text.length > 500 && (text.includes('<') || text.includes('ingredient') || text.includes('רכיבים'))) {
+            html = text;
+            break;
+          }
+        }
       } catch(e) { continue; }
     }
 
@@ -678,7 +694,7 @@ async function fetchRecipeFromUrl(url) {
     }
 
     const parsed = extractRecipeFromHtml(html, url);
-    if (parsed) {
+    if (parsed && parsed.ingredients.length > 0) {
       showImportPreview(parsed);
     } else {
       alert('Could not find a clear recipe on that page. Please paste the recipe text directly.');
@@ -699,8 +715,8 @@ function extractRecipeFromHtml(html, url) {
   for (const script of scripts) {
     try {
       let data = JSON.parse(script.textContent);
-      if (Array.isArray(data)) data = data[0];
-      if (data['@graph']) data = data['@graph'].find(x => x['@type'] === 'Recipe') || data;
+      if (Array.isArray(data)) data = data.find(x => x['@type'] === 'Recipe') || data[0];
+      if (data['@graph']) data = data['@graph'].find(x => x['@type'] === 'Recipe' || (Array.isArray(x['@type']) && x['@type'].includes('Recipe'))) || data;
 
       if (data['@type'] === 'Recipe' || (Array.isArray(data['@type']) && data['@type'].includes('Recipe'))) {
         const ingredients = Array.isArray(data.recipeIngredient) ? data.recipeIngredient : [];
@@ -711,66 +727,122 @@ function extractRecipeFromHtml(html, url) {
           steps = data.recipeInstructions.split(/\.\s+/).filter(Boolean);
         }
 
-        return {
-          name: data.name || 'Imported Recipe',
-          ingredients,
-          steps,
-          allergens: detectAllergens(ingredients.join(' ')),
-          notes: data.description || '',
-          source: url
-        };
+        if (ingredients.length > 0) {
+          return {
+            name: data.name || 'Imported Recipe',
+            ingredients,
+            steps,
+            allergens: detectAllergens(ingredients.join(' ')),
+            notes: data.description || '',
+            source: url
+          };
+        }
       }
     } catch(e) {}
   }
 
-  // Fallback: extract text
+  // Try microdata (itemtype Recipe)
+  const recipeEl = doc.querySelector('[itemtype*="Recipe"]');
+  if (recipeEl) {
+    const name = recipeEl.querySelector('[itemprop="name"]')?.textContent?.trim() || '';
+    const ingEls = recipeEl.querySelectorAll('[itemprop="recipeIngredient"], [itemprop="ingredients"]');
+    const stepEls = recipeEl.querySelectorAll('[itemprop="recipeInstructions"] li, [itemprop="step"]');
+    if (ingEls.length > 0) {
+      const ingredients = [...ingEls].map(e => e.textContent.trim()).filter(Boolean);
+      const steps = stepEls.length > 0
+        ? [...stepEls].map(e => e.textContent.trim()).filter(Boolean)
+        : (recipeEl.querySelector('[itemprop="recipeInstructions"]')?.textContent?.trim() || '').split('\n').map(s => s.trim()).filter(Boolean);
+      return {
+        name: name || 'Imported Recipe', ingredients, steps,
+        allergens: detectAllergens(ingredients.join(' ')),
+        notes: '', source: url
+      };
+    }
+  }
+
+  // Try common recipe plugin CSS classes (WPRM, Tasty, etc.)
+  const wprmIngredients = doc.querySelectorAll('.wprm-recipe-ingredient, .tasty-recipe-ingredients li, .recipe-ingredients li, .ingredient');
+  const wprmSteps = doc.querySelectorAll('.wprm-recipe-instruction, .tasty-recipe-instructions li, .recipe-instructions li, .direction, .step');
+  if (wprmIngredients.length > 0) {
+    const name = (doc.querySelector('.wprm-recipe-name, .tasty-recipes-title, .recipe-title, h2.recipe-name') || doc.querySelector('h1'))?.textContent?.trim() || '';
+    const ingredients = [...wprmIngredients].map(e => e.textContent.trim()).filter(Boolean);
+    const steps = [...wprmSteps].map(e => e.textContent.trim()).filter(Boolean);
+    return {
+      name: name || 'Imported Recipe', ingredients, steps,
+      allergens: detectAllergens(ingredients.join(' ')),
+      notes: '', source: url
+    };
+  }
+
+  // Fallback: strip scripts/styles, then extract clean text
+  doc.querySelectorAll('script, style, noscript, nav, footer, header, iframe, svg, form, [role="navigation"], [role="banner"]').forEach(el => el.remove());
   const body = doc.body?.textContent || '';
-  if (body.length > 100) {
-    return parseRecipeText(body, url, true);
+  // Filter out lines that look like CSS/JS
+  const cleanText = body.split('\n')
+    .map(s => s.trim())
+    .filter(s => s.length > 0 && s.length < 300)
+    .filter(s => !s.match(/^[\{\};\(\)]/) && !s.includes('{') && !s.includes('}') && !s.includes('function(') && !s.includes('var ') && !s.includes('const ') && !s.includes('/*') && !s.includes('*/') && !s.includes('img.') && !s.includes('display:') && !s.includes('border:'))
+    .join('\n');
+
+  if (cleanText.length > 50) {
+    return parseRecipeText(cleanText, url, true);
   }
   return null;
 }
 
 function parseRecipeText(text, source = '', returnOnly = false) {
-  const lines = text.split('\n').map(s => s.trim()).filter(Boolean);
+  const lines = text.split('\n').map(s => s.trim()).filter(s => s.length > 0 && s.length < 200);
   let name = '';
   let ingredients = [];
   let steps = [];
   let section = 'unknown';
 
+  // Hebrew keywords for section detection
+  const ingKeywords = /^(ingredient|what you.?ll need|רכיבים|חומרים|מצרכים|מה צריך)/i;
+  const stepKeywords = /^(step|instruction|direction|method|preparation|how to make|אופן הכנה|הוראות הכנה|הכנה|שלבי הכנה|אופן ההכנה)/i;
+
   for (const line of lines) {
-    if (line.length < 80 && !line.match(/^(ingredient|step|instruction|direction|method|preparation)/i)) {
-      if (!name) { name = line.replace(/^#+\s*/, ''); continue; }
+    // Skip very short junk lines or lines that look like metadata
+    if (line.length < 2) continue;
+    if (line.match(/^(share|print|save|skip|jump|copyright|©|\d+\s*(comment|review|rating|calorie|minute|serving))/i)) continue;
+
+    // Detect title
+    if (!name && line.length < 100 && !line.match(ingKeywords) && !line.match(stepKeywords)) {
+      name = line.replace(/^#+\s*/, '');
+      continue;
     }
 
-    const lowerLine = line.toLowerCase();
-    if (lowerLine.match(/^(ingredient|what you.?ll need)/i)) { section = 'ingredients'; continue; }
-    if (lowerLine.match(/^(step|instruction|direction|method|preparation|how to make)/i)) { section = 'steps'; continue; }
+    // Section headers
+    if (ingKeywords.test(line)) { section = 'ingredients'; continue; }
+    if (stepKeywords.test(line)) { section = 'steps'; continue; }
 
+    // Auto-detect section from content patterns
     if (section === 'unknown') {
-      if (line.match(/^\d+[\.\)]\s/) || line.match(/^(first|then|next|finally)/i)) {
+      if (line.match(/^\d+[\.\)]\s/) || line.match(/^(first|then|next|finally|לחמם|לערבב|לטחון|לשים|לאפות|להוסיף|לבשל)/i)) {
         section = 'steps';
-      } else if (line.match(/^[\-\*]\s/) || line.match(/^\d+\s*(tbsp|tsp|cup|g|ml|oz)/i)) {
+      } else if (line.match(/^[\-\*]\s/) || line.match(/^\d+\s*(tbsp|tsp|cup|cups|g|kg|ml|oz|כפ|כוס|חצי|רבע)/i) || line.match(/^(כף|כפית|חצי|רבע|כוס|\d)/)) {
         section = 'ingredients';
       }
     }
 
     const cleaned = line.replace(/^[\-\*\d\.\)]+\s*/, '');
-    if (section === 'ingredients' && cleaned.length < 100) {
+    if (!cleaned || cleaned.length < 2) continue;
+
+    if (section === 'ingredients' && cleaned.length < 120) {
       ingredients.push(cleaned);
     } else if (section === 'steps') {
       steps.push(cleaned);
     } else if (cleaned.length < 80) {
+      // Ambiguous - store for now, will assign later
       ingredients.push(cleaned);
-    } else {
-      steps.push(cleaned);
     }
   }
 
   if (ingredients.length === 0 && steps.length === 0) {
-    const midpoint = Math.floor(lines.length / 2);
-    ingredients = lines.slice(0, midpoint).map(l => l.replace(/^[\-\*\d\.\)]+\s*/, ''));
-    steps = lines.slice(midpoint).map(l => l.replace(/^[\-\*\d\.\)]+\s*/, ''));
+    const useful = lines.filter(l => l.length > 3 && l.length < 200);
+    const midpoint = Math.floor(useful.length / 2);
+    ingredients = useful.slice(0, midpoint).map(l => l.replace(/^[\-\*\d\.\)]+\s*/, ''));
+    steps = useful.slice(midpoint).map(l => l.replace(/^[\-\*\d\.\)]+\s*/, ''));
   }
 
   const result = {
