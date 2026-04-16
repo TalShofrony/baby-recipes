@@ -331,30 +331,40 @@ function isAllergenIng(ing) {
   return false;
 }
 
-// Minor ingredients to exclude from filter chips
-const MINOR_INGS = new Set(['salt','pepper','water','oil','olive oil','sugar','pinch','cinnamon','vanilla',
-  'מלח','פלפל','מים','שמן','שמן זית','סוכר','קינמון','וניל','קורט','מעט','שמן קנולה','שמן לטיגון',
-  'pinch of cinnamon','pinch of salt','squeeze of lemon juice','lemon juice','garlic','שום']);
+// Known main food items - only these will show as filter chips
+const MAIN_FOODS = [
+  // English
+  'banana','sweet potato','potato','zucchini','carrot','avocado','salmon','chicken','beef','turkey',
+  'egg','cheese','rice','oat','oats','broccoli','spinach','pea','peas','corn','apple','pear','mango',
+  'blueberry','blueberries','strawberry','lentil','lentils','chickpea','chickpeas','tofu','tuna',
+  'cauliflower','pumpkin','squash','tomato','pasta','bread','yogurt','cream cheese','cottage cheese',
+  'butter','peanut butter','tahini','hummus',
+  // Hebrew
+  'בננה','בטטה','תפוח אדמה','קישוא','גזר','אבוקדו','סלמון','עוף','בקר','הודו',
+  'ביצה','גבינה','אורז','שיבולת שועל','ברוקולי','תרד','אפונה','תירס','תפוח','אגס','מנגו',
+  'אוכמניות','תות','עדשים','חומוס','טופו','טונה',
+  'כרובית','דלעת','עגבניה','פסטה','לחם','יוגורט','גבינת שמנת','קוטג',
+  'חמאה','חמאת בוטנים','טחינה'
+];
 
 function getMainIngredients() {
   const counts = {};
   recipes.forEach(r => {
     const seen = new Set();
     r.ingredients.forEach(raw => {
-      // Extract just the ingredient name (strip qty/unit)
-      const name = raw.replace(/^[\d\/\.½¼¾⅓⅔\s\-]+/, '')
-        .replace(/^(tbsp|tsp|cup|cups|g|kg|ml|l|oz|lb|כפ(?:ות|ית)?|כף|כוס(?:ות)?|גרם|קילו|מ"ל|ליטר)\s*/i, '')
-        .trim().toLowerCase();
-      if (name.length < 2 || MINOR_INGS.has(name)) return;
-      // Use first 2 words max as key
-      const short = name.split(/\s+/).slice(0, 2).join(' ');
-      if (!seen.has(short)) { seen.add(short); counts[short] = (counts[short]||0) + 1; }
+      const lower = raw.toLowerCase();
+      for (const food of MAIN_FOODS) {
+        if (lower.includes(food) && !seen.has(food)) {
+          seen.add(food);
+          counts[food] = (counts[food]||0) + 1;
+        }
+      }
     });
   });
-  // Only show ingredients that appear in 2+ recipes, or top 12 if not enough
-  let ings = Object.entries(counts).filter(([,c]) => c >= 2).map(([n]) => n).sort();
-  if (ings.length < 3) ings = Object.entries(counts).sort((a,b) => b[1]-a[1]).slice(0, 12).map(([n]) => n).sort();
-  return ings;
+  // Show foods that appear in at least 1 recipe, sorted by frequency then name
+  return Object.entries(counts)
+    .sort((a,b) => b[1]-a[1] || a[0].localeCompare(b[0]))
+    .map(([n]) => n);
 }
 
 function getAllCats() {
@@ -372,7 +382,8 @@ let activeIngs = new Set();
 const TIME_OPTIONS = [
   { label: 'Up to 15 min', max: 15 },
   { label: 'Up to 30 min', max: 30 },
-  { label: 'Up to 45 min', max: 45 }
+  { label: 'Up to 45 min', max: 45 },
+  { label: '45+ min', max: 9999 }
 ];
 
 function renderFilters() {
@@ -421,7 +432,10 @@ function filtered() {
   return recipes.filter(r => {
     if (q && !(r.name+' '+r.ingredients.join(' ')+(r.notes||'')).toLowerCase().includes(q)) return false;
     if (activeCat && r.category !== activeCat) return false;
-    if (activeTime && (!r.prepTime || r.prepTime > activeTime)) return false;
+    if (activeTime) {
+      if (activeTime === 9999) { if (!r.prepTime || r.prepTime <= 45) return false; }
+      else if (!r.prepTime || r.prepTime > activeTime) return false;
+    }
     if (activeIngs.size > 0) {
       const rIngs = r.ingredients.join(' ').toLowerCase();
       for (const ing of activeIngs) { if (!rIngs.includes(ing)) return false; }
