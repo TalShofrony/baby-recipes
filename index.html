@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="he" dir="rtl">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -60,14 +60,15 @@
   .card-cat { font-size:0.72rem; background:var(--secondary); color:#fff; padding:0.15rem 0.5rem; border-radius:8px; white-space:nowrap; flex-shrink:0; }
 
   .card-chips { padding:0 1rem 0.7rem; display:flex; flex-wrap:wrap; gap:0.3rem; }
-  .chip { font-size:0.75rem; padding:0.15rem 0.45rem; border-radius:8px; background:#f0f0f0; }
+  .chip { font-size:0.75rem; padding:0.15rem 0.45rem; border-radius:8px; background:#f0f0f0; unicode-bidi:plaintext; }
   .chip.allergen { background:var(--allergen-bg); color:var(--allergen); font-weight:600; }
 
   .card-detail { display:none; padding:0 1rem 1rem; border-top:1px solid var(--border); }
   .card-detail.show { display:block; }
   .card-detail h3 { font-size:0.9rem; margin:0.7rem 0 0.3rem; }
-  .card-detail li { font-size:0.88rem; line-height:1.5; margin-bottom:0.2rem; }
+  .card-detail li { font-size:0.88rem; line-height:1.5; margin-bottom:0.2rem; unicode-bidi:plaintext; }
   .card-detail ul, .card-detail ol { padding-inline-start:1.2rem; }
+  .card-detail h2, .card-detail h3, .card-detail li, .card-detail p { direction:auto; }
   .allergen-note { font-size:0.8rem; color:var(--allergen); margin-top:0.5rem; }
   .source-link { font-size:0.78rem; color:var(--secondary); display:block; margin-top:0.4rem; }
   .card-actions { display:flex; gap:0.4rem; margin-top:0.6rem; }
@@ -113,14 +114,14 @@
 
 <div class="container">
   <div class="controls">
-    <input type="text" class="search-box" id="searchBox" placeholder="...חיפוש לפי שם או מצרך">
-    <button class="btn btn-primary" onclick="openModal()">+ הוספת מתכון</button>
+    <input type="text" class="search-box" id="searchBox" placeholder="Search by name or ingredient...">
+    <button class="btn btn-primary" onclick="openModal()">+ Add Recipe</button>
   </div>
   <div class="cat-bar" id="catBar"></div>
   <div class="recipe-grid" id="grid"></div>
   <div class="data-bar">
-    <button class="btn btn-outline btn-sm" onclick="exportAll()">ייצוא</button>
-    <button class="btn btn-outline btn-sm" onclick="document.getElementById('impFile').click()">ייבוא</button>
+    <button class="btn btn-outline btn-sm" onclick="exportAll()">Export</button>
+    <button class="btn btn-outline btn-sm" onclick="document.getElementById('impFile').click()">Import</button>
     <input type="file" id="impFile" accept=".json" style="display:none" onchange="importAll(event)">
   </div>
 </div>
@@ -129,46 +130,46 @@
 <div class="overlay" id="modal">
   <div class="modal">
     <div class="modal-head">
-      <h2 id="modalTitle">הוספת מתכון</h2>
+      <h2 id="modalTitle">Add Recipe</h2>
       <button class="modal-close" onclick="closeModal()">&times;</button>
     </div>
     <div class="modal-body">
       <div class="tabs">
-        <button class="tab active" onclick="switchTab('manual',this)">הזנה ידנית</button>
-        <button class="tab" onclick="switchTab('paste',this)">הדבקת טקסט / קישור</button>
+        <button class="tab active" onclick="switchTab('manual',this)">Manual Entry</button>
+        <button class="tab" onclick="switchTab('paste',this)">Paste Text / URL</button>
       </div>
 
       <div id="tab-manual">
         <div class="field">
-          <label>שם המתכון *</label>
-          <input type="text" id="fName" placeholder="לדוגמא: מאפינס בננה">
+          <label>Recipe Name *</label>
+          <input type="text" id="fName" placeholder="e.g. Banana Muffins">
         </div>
         <div class="field">
-          <label>קטגוריה</label>
+          <label>Category</label>
           <div class="cat-select" id="catPicker"></div>
         </div>
         <div class="field">
-          <label>מצרכים *</label>
-          <textarea id="fIng" placeholder="מצרך אחד בכל שורה:&#10;1 בננה בשלה&#10;1 ביצה&#10;3 כפות קמח שיבולת שועל"></textarea>
+          <label>Ingredients *</label>
+          <textarea id="fIng" placeholder="One per line:&#10;1 ripe banana&#10;1 egg&#10;3 tbsp oat flour"></textarea>
         </div>
         <div class="field">
-          <label>הוראות הכנה *</label>
-          <textarea id="fSteps" placeholder="שלב אחד בכל שורה:&#10;לחמם תנור ל-180&#10;לערבב את כל החומרים&#10;לאפות 25 דקות"></textarea>
+          <label>Steps *</label>
+          <textarea id="fSteps" placeholder="One per line:&#10;Preheat oven to 180C&#10;Mix all ingredients&#10;Bake for 25 minutes"></textarea>
         </div>
         <div class="field">
-          <label>הערות (אופציונלי)</label>
-          <textarea id="fNotes" placeholder="טיפים, וריאציות, אחסון..." style="min-height:50px"></textarea>
+          <label>Notes (optional)</label>
+          <textarea id="fNotes" placeholder="Tips, variations, storage..." style="min-height:50px"></textarea>
         </div>
-        <button class="btn btn-primary" onclick="saveRecipe()" style="width:100%">שמירה</button>
+        <button class="btn btn-primary" onclick="saveRecipe()" style="width:100%">Save</button>
       </div>
 
       <div id="tab-paste" style="display:none">
         <div class="field">
-          <label>הדבקת טקסט מתכון או קישור *</label>
-          <textarea id="fPaste" placeholder="אפשרות 1: להדביק קישור&#10;https://example.com/recipe/...&#10;&#10;אפשרות 2: להדביק את הטקסט המלא מהאתר&#10;(סמן הכל → העתק → הדבק כאן)" style="min-height:160px"></textarea>
-          <div class="hint">עובד הכי טוב עם הדבקת טקסט ישירות מהאתר (Ctrl+A → Ctrl+C)</div>
+          <label>Paste recipe text or URL *</label>
+          <textarea id="fPaste" placeholder="Option 1: Paste a link&#10;https://example.com/recipe/...&#10;&#10;Option 2: Paste full recipe text from the website&#10;(Select All &#8594; Copy &#8594; Paste here)" style="min-height:160px"></textarea>
+          <div class="hint">Works best when pasting text directly from the website (Ctrl+A, Ctrl+C)</div>
         </div>
-        <button class="btn btn-secondary" onclick="analyzeImport()" style="width:100%" id="analyzeBtn">ניתוח וייבוא</button>
+        <button class="btn btn-secondary" onclick="analyzeImport()" style="width:100%" id="analyzeBtn">Analyze & Import</button>
         <div id="preview" style="display:none; margin-top:0.8rem;"></div>
       </div>
     </div>
@@ -176,17 +177,17 @@
 </div>
 
 <script>
-const CATEGORIES = ['מאפינס','פנקייק','מרק','פיורה','פסטה','אורז','ירקות','בשר','דגים','חטיפים','קינוח','אחר'];
+const CATEGORIES = ['Muffins','Pancakes','Soup','Puree','Pasta','Rice','Veggies','Meat','Fish','Snacks','Dessert','Other'];
 
 const ALLERGEN_KEYWORDS = {
-  'חלב': ['milk','cream','butter','cheese','yogurt','yoghurt','ghee','dairy','חלב','שמנת','חמאה','גבינה','יוגורט','קוטג','מוצרלה','פרמזן','שמנת'],
-  'ביצים': ['egg','eggs','yolk','mayo','ביצה','ביצים','חלמון','מיונז'],
-  'בוטנים': ['peanut','peanut butter','בוטנים','חמאת בוטנים','בוטן'],
-  'אגוזי עץ': ['almond','cashew','walnut','pecan','pistachio','hazelnut','שקד','שקדים','קשיו','אגוז','אגוזים','פקאן','פיסטוק','צנובר'],
-  'גלוטן': ['wheat','flour','bread','pasta','noodle','couscous','semolina','bulgur','breadcrumb','panko','pita','חיטה','קמח','לחם','פסטה','אטריות','קוסקוס','בורגול','פתיתים','פיתה'],
-  'סויה': ['soy','soya','tofu','tempeh','edamame','miso','סויה','טופו','אדממה','מיסו'],
-  'דגים': ['fish','salmon','tuna','cod','tilapia','sardine','דג','סלמון','טונה','בקלה','טילפיה','פורל'],
-  'שומשום': ['sesame','tahini','שומשום','טחינה']
+  'Dairy': ['milk','cream','butter','cheese','yogurt','yoghurt','ghee','dairy','חלב','שמנת','חמאה','גבינה','יוגורט','קוטג','מוצרלה','פרמזן'],
+  'Eggs': ['egg','eggs','yolk','mayo','ביצה','ביצים','חלמון','מיונז'],
+  'Peanuts': ['peanut','peanut butter','בוטנים','חמאת בוטנים','בוטן'],
+  'Tree Nuts': ['almond','cashew','walnut','pecan','pistachio','hazelnut','שקד','שקדים','קשיו','אגוז','אגוזים','פקאן','פיסטוק','צנובר'],
+  'Gluten': ['wheat','flour','bread','pasta','noodle','couscous','semolina','bulgur','breadcrumb','panko','pita','חיטה','קמח','לחם','פסטה','אטריות','קוסקוס','בורגול','פתיתים','פיתה'],
+  'Soy': ['soy','soya','tofu','tempeh','edamame','miso','סויה','טופו','אדממה','מיסו'],
+  'Fish': ['fish','salmon','tuna','cod','tilapia','sardine','דג','סלמון','טונה','בקלה','טילפיה','פורל'],
+  'Sesame': ['sesame','tahini','שומשום','טחינה']
 };
 
 let recipes = JSON.parse(localStorage.getItem('babyRecipes2') || '[]');
@@ -196,22 +197,22 @@ let activeCat = '';
 if (recipes.length === 0) {
   recipes = [
     {
-      id: 1, name: "פיורה בטטה", category: "פיורה",
-      ingredients: ["2 בטטות בינוניות","1 כף שמן זית","קורט קינמון"],
-      steps: ["לקלף ולחתוך את הבטטות לקוביות","לאדות 15 דקות עד שרכות","לטחון עם שמן זית עד לקוואם חלק","להוסיף קורט קינמון ולערבב","לצנן לפני הגשה"],
-      allergens: [], notes: "אפשר להקפיא בתבנית קוביות קרח", source: ""
+      id: 1, name: "Sweet Potato Puree", category: "Puree",
+      ingredients: ["2 medium sweet potatoes","1 tbsp olive oil","Pinch of cinnamon"],
+      steps: ["Peel and dice the sweet potatoes","Steam for 15 minutes until soft","Blend with olive oil until smooth","Add a pinch of cinnamon and mix","Let cool before serving"],
+      allergens: [], notes: "Can be frozen in ice cube trays for easy portions", source: ""
     },
     {
-      id: 2, name: "פנקייק בננה ושיבולת שועל", category: "פנקייק",
-      ingredients: ["1 בננה בשלה","1 ביצה","3 כפות קמח שיבולת שועל","1 כפית חמאה לטיגון"],
-      steps: ["למעוך את הבננה","לטרוף את הביצה ולערבב","להוסיף קמח שיבולת שועל","לחמם חמאה במחבת על אש קטנה","ליצוק כפות קטנות ולטגן 2 דקות מכל צד","לצנן ולחתוך לרצועות"],
-      allergens: ["ביצים","חלב"], notes: "מושלם לאכילה עצמאית!", source: ""
+      id: 2, name: "Banana Oat Pancakes", category: "Pancakes",
+      ingredients: ["1 ripe banana","1 egg","3 tbsp oat flour","1 tsp butter for cooking"],
+      steps: ["Mash the banana","Beat in the egg and mix","Add oat flour","Heat butter in a pan on low-medium","Drop small spoonfuls and cook 2 min per side","Cool and cut into strips"],
+      allergens: ["Eggs","Dairy"], notes: "Perfect for self-feeding!", source: ""
     },
     {
-      id: 3, name: "מחית אבוקדו וסלמון", category: "דגים",
-      ingredients: ["חצי אבוקדו בשל","50 גרם סלמון מבושל","מעט מיץ לימון"],
-      steps: ["לוודא שהסלמון מבושל היטב ולפורר במזלג","למעוך את האבוקדו","לערבב יחד","להוסיף מעט מיץ לימון"],
-      allergens: ["דגים"], notes: "מקור מצוין לאומגה 3", source: ""
+      id: 3, name: "Avocado Salmon Mash", category: "Fish",
+      ingredients: ["1/2 ripe avocado","50g cooked salmon","Squeeze of lemon juice"],
+      steps: ["Make sure salmon is fully cooked and flake with a fork","Mash the avocado","Combine together","Add a squeeze of lemon juice"],
+      allergens: ["Fish"], notes: "Great source of omega-3", source: ""
     }
   ];
   save();
@@ -264,7 +265,7 @@ function filtered() {
 function renderGrid() {
   const g = document.getElementById('grid');
   const list = filtered();
-  if (!list.length) { g.innerHTML = `<div class="empty">${recipes.length?'אין תוצאות':'אין מתכונים עדיין. הוסיפו את הראשון!'}</div>`; return; }
+  if (!list.length) { g.innerHTML = `<div class="empty">${recipes.length?'No results':'No recipes yet. Add your first one!'}</div>`; return; }
 
   g.innerHTML = list.map(r => `
     <div class="recipe-card">
@@ -276,16 +277,17 @@ function renderGrid() {
         ${r.ingredients.map(i => `<span class="chip ${isAllergenIng(i)?'allergen':''}">${esc(i)}</span>`).join('')}
       </div>
       <div class="card-detail" id="d${r.id}">
-        <h3>מצרכים</h3>
+        <h3>Ingredients</h3>
         <ul>${r.ingredients.map(i => `<li>${isAllergenIng(i)?'<strong style="color:var(--allergen)">'+esc(i)+'</strong>':esc(i)}</li>`).join('')}</ul>
-        <h3>הוראות הכנה</h3>
+        <h3>Steps</h3>
         <ol>${r.steps.map(s => `<li>${esc(s)}</li>`).join('')}</ol>
-        ${r.allergens.length ? `<div class="allergen-note">אלרגנים: ${r.allergens.join(', ')}</div>` : ''}
+        ${r.allergens.length ? `<div class="allergen-note">Allergens: ${r.allergens.join(', ')}</div>` : ''}
         ${r.notes ? `<p style="margin-top:0.4rem;font-size:0.82rem;color:var(--text-light)">${esc(r.notes)}</p>` : ''}
-        ${r.source ? `<a href="${esc(r.source)}" target="_blank" rel="noopener" class="source-link">מתכון מקורי</a>` : ''}
+        ${r.source ? `<a href="${esc(r.source)}" target="_blank" rel="noopener" class="source-link">Original recipe</a>` : ''}
         <div class="card-actions">
-          <button class="btn btn-outline btn-sm" onclick="editR(${r.id});event.stopPropagation()">עריכה</button>
-          <button class="btn btn-danger btn-sm" onclick="delR(${r.id});event.stopPropagation()">מחיקה</button>
+          ${hasHebrew(r.name+r.ingredients.join('')) ? `<button class="btn btn-secondary btn-sm" onclick="translateR(${r.id});event.stopPropagation()">Translate</button>` : ''}
+          <button class="btn btn-outline btn-sm" onclick="editR(${r.id});event.stopPropagation()">Edit</button>
+          <button class="btn btn-danger btn-sm" onclick="delR(${r.id});event.stopPropagation()">Delete</button>
         </div>
       </div>
     </div>
@@ -300,7 +302,7 @@ let selectedCat = '';
 
 function openModal() {
   editingId = null; selectedCat = '';
-  document.getElementById('modalTitle').textContent = 'הוספת מתכון';
+  document.getElementById('modalTitle').textContent = 'Add Recipe';
   clearForm(); renderCatPicker();
   document.getElementById('modal').classList.add('show');
 }
@@ -334,7 +336,7 @@ function saveRecipe() {
   const ings = document.getElementById('fIng').value.trim();
   const steps = document.getElementById('fSteps').value.trim();
   const notes = document.getElementById('fNotes').value.trim();
-  if (!name || !ings || !steps) { alert('נא למלא שם, מצרכים והוראות הכנה'); return; }
+  if (!name || !ings || !steps) { alert('Please fill in name, ingredients, and steps'); return; }
 
   const ingredients = ings.split('\n').map(s=>s.trim()).filter(Boolean);
   const stepList = steps.split('\n').map(s=>s.trim()).filter(Boolean);
@@ -353,7 +355,7 @@ function editR(id) {
   const r = recipes.find(x=>x.id===id);
   if (!r) return;
   editingId = id;
-  document.getElementById('modalTitle').textContent = 'עריכת מתכון';
+  document.getElementById('modalTitle').textContent = 'Edit Recipe';
   document.getElementById('fName').value = r.name;
   document.getElementById('fIng').value = r.ingredients.join('\n');
   document.getElementById('fSteps').value = r.steps.join('\n');
@@ -365,7 +367,7 @@ function editR(id) {
 }
 
 function delR(id) {
-  if (!confirm('למחוק את המתכון?')) return;
+  if (!confirm('Delete this recipe?')) return;
   recipes = recipes.filter(r=>r.id!==id);
   save(); render();
 }
@@ -373,13 +375,13 @@ function delR(id) {
 // Import: paste text or URL
 function analyzeImport() {
   const input = document.getElementById('fPaste').value.trim();
-  if (!input) { alert('נא להדביק טקסט או קישור'); return; }
+  if (!input) { alert('Please paste text or a URL'); return; }
 
   const btn = document.getElementById('analyzeBtn');
 
   if (/^https?:\/\//i.test(input)) {
-    btn.disabled = true; btn.textContent = 'טוען...';
-    fetchUrl(input).finally(() => { btn.disabled = false; btn.textContent = 'ניתוח וייבוא'; });
+    btn.disabled = true; btn.textContent = 'Loading...';
+    fetchUrl(input).finally(() => { btn.disabled = false; btn.textContent = 'Analyze & Import'; });
   } else {
     const result = parseText(input);
     showPreview(result);
@@ -404,13 +406,13 @@ async function fetchUrl(url) {
     } catch(e) { continue; }
   }
 
-  if (!html) { alert('לא הצלחתי לגשת לאתר.\nנסו להעתיק את הטקסט מהאתר ולהדביק אותו כאן.'); return; }
+  if (!html) { alert('Could not fetch the URL.\nTry copying the text from the website and pasting it here.'); return; }
 
   const result = extractFromHtml(html, url);
   if (result && result.ingredients.length > 0) {
     showPreview(result);
   } else {
-    alert('לא מצאתי מתכון בדף.\nנסו להעתיק את הטקסט מהאתר ולהדביק אותו כאן.');
+    alert('Could not find a recipe on this page.\nTry copying the text and pasting it here.');
   }
 }
 
@@ -486,7 +488,7 @@ function parseText(text, source = '') {
   }
 
   return {
-    name: name || 'מתכון מיובא',
+    name: name || 'Imported Recipe',
     ingredients: ingredients.slice(0,30),
     steps: steps.slice(0,25),
     allergens: detectAllergens(ingredients.join(' ')),
@@ -501,14 +503,33 @@ function showPreview(data) {
   p.innerHTML = `
     <div style="background:#f0faf8;border-radius:10px;padding:0.8rem;border:1px solid #c8e6e0">
       <strong>${esc(data.name)}</strong><br>
-      <span style="font-size:0.82rem">מצרכים (${data.ingredients.length}): ${data.ingredients.slice(0,5).map(esc).join(', ')}${data.ingredients.length>5?'...':''}</span><br>
-      <span style="font-size:0.82rem">שלבים: ${data.steps.length}</span>
-      ${data.allergens.length ? `<br><span style="font-size:0.82rem;color:var(--allergen)">אלרגנים: ${data.allergens.join(', ')}</span>` : ''}
+      <span style="font-size:0.82rem">Ingredients (${data.ingredients.length}): ${data.ingredients.slice(0,5).map(esc).join(', ')}${data.ingredients.length>5?'...':''}</span><br>
+      <span style="font-size:0.82rem">Steps: ${data.steps.length}</span>
+      ${data.allergens.length ? `<br><span style="font-size:0.82rem;color:var(--allergen)">Allergens: ${data.allergens.join(', ')}</span>` : ''}
       <div style="display:flex;gap:0.4rem;margin-top:0.6rem">
-        <button class="btn btn-primary btn-sm" onclick="confirmImport()">הוספה</button>
-        <button class="btn btn-outline btn-sm" onclick="editImported()">עריכה לפני הוספה</button>
+        <button class="btn btn-primary btn-sm" onclick="confirmImport()">Add</button>
+        ${hasHebrew(data.name+data.ingredients.join('')) ? `<button class="btn btn-secondary btn-sm" onclick="translatePreview()">Translate to English</button>` : ''}
+        <button class="btn btn-outline btn-sm" onclick="editImported()">Edit First</button>
       </div>
     </div>`;
+}
+
+async function translatePreview() {
+  const d = document.getElementById('preview')._data;
+  if (!d) return;
+  const allText = [d.name, ...d.ingredients, '---STEPS---', ...d.steps, '---NOTES---', d.notes||''].join('\n');
+  const translated = await translateText(allText);
+  const parts = translated.split('\n');
+  d.name = parts[0] || d.name;
+  const stepsIdx = parts.indexOf('---STEPS---');
+  const notesIdx = parts.indexOf('---NOTES---');
+  if (stepsIdx > 0 && notesIdx > 0) {
+    d.ingredients = parts.slice(1, stepsIdx).filter(Boolean);
+    d.steps = parts.slice(stepsIdx + 1, notesIdx).filter(Boolean);
+    d.notes = parts.slice(notesIdx + 1).join(' ').trim();
+  }
+  d.allergens = detectAllergens(d.ingredients.join(' '));
+  showPreview(d);
 }
 
 function confirmImport() {
@@ -533,21 +554,70 @@ function editImported() {
 function guessCategory(name) {
   const n = name.toLowerCase();
   const map = {
-    'מאפינס': ['מאפינ','muffin'],
-    'פנקייק': ['פנקייק','pancake','לביבה','לביבות'],
-    'מרק': ['מרק','soup'],
-    'פיורה': ['פיורה','puree','מחית','מעוך'],
-    'פסטה': ['פסטה','pasta','נודלס','אטריות'],
-    'אורז': ['אורז','rice','ריזוטו'],
-    'דגים': ['דג','סלמון','טונה','fish','salmon'],
-    'בשר': ['בשר','עוף','הודו','כבד','meat','chicken'],
-    'חטיפים': ['חטיף','ביס','snack','balls','כדור'],
-    'קינוח': ['עוגה','עוגיה','קינוח','dessert','cake','cookie']
+    'Muffins': ['מאפינ','muffin'],
+    'Pancakes': ['פנקייק','pancake','לביבה','לביבות'],
+    'Soup': ['מרק','soup'],
+    'Puree': ['פיורה','puree','מחית','מעוך'],
+    'Pasta': ['פסטה','pasta','נודלס','אטריות'],
+    'Rice': ['אורז','rice','ריזוטו'],
+    'Fish': ['דג','סלמון','טונה','fish','salmon'],
+    'Meat': ['בשר','עוף','הודו','כבד','meat','chicken','turkey'],
+    'Snacks': ['חטיף','ביס','snack','balls','כדור','bite'],
+    'Dessert': ['עוגה','עוגיה','קינוח','dessert','cake','cookie']
   };
   for (const [cat, kws] of Object.entries(map)) {
     if (kws.some(kw => n.includes(kw))) return cat;
   }
   return '';
+}
+
+// Hebrew detection & translation
+function hasHebrew(text) { return /[\u0590-\u05FF]/.test(text); }
+
+async function translateText(text, from='iw', to='en') {
+  try {
+    const r = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=${from}&tl=${to}&dt=t&q=${encodeURIComponent(text)}`);
+    const d = await r.json();
+    return d[0].map(x => x[0]).join('');
+  } catch(e) { return text; }
+}
+
+async function translateR(id) {
+  const r = recipes.find(x => x.id === id);
+  if (!r) return;
+
+  const btn = event.target;
+  btn.disabled = true; btn.textContent = 'Translating...';
+
+  try {
+    // Batch all text into one request separated by newlines, then split back
+    const allText = [r.name, ...r.ingredients, '---STEPS---', ...r.steps, '---NOTES---', r.notes||''].join('\n');
+    const translated = await translateText(allText);
+    const parts = translated.split('\n');
+
+    r.name = parts[0] || r.name;
+    const stepsIdx = parts.indexOf('---STEPS---');
+    const notesIdx = parts.indexOf('---NOTES---');
+
+    if (stepsIdx > 0 && notesIdx > 0) {
+      r.ingredients = parts.slice(1, stepsIdx).filter(Boolean);
+      r.steps = parts.slice(stepsIdx + 1, notesIdx).filter(Boolean);
+      r.notes = parts.slice(notesIdx + 1).join(' ').trim();
+    } else {
+      // Fallback: translate individually
+      r.name = await translateText(r.name);
+      r.ingredients = await Promise.all(r.ingredients.map(i => translateText(i)));
+      r.steps = await Promise.all(r.steps.map(s => translateText(s)));
+      if (r.notes) r.notes = await translateText(r.notes);
+    }
+
+    r.allergens = detectAllergens(r.ingredients.join(' '));
+    if (!r.category || hasHebrew(r.category)) r.category = guessCategory(r.name);
+    save(); render();
+  } catch(e) {
+    alert('Translation failed. Try again later.');
+    btn.disabled = false; btn.textContent = 'Translate';
+  }
 }
 
 // Export/Import
@@ -562,13 +632,13 @@ function importAll(e) {
   reader.onload = function(ev) {
     try {
       const imp = JSON.parse(ev.target.result);
-      if (!Array.isArray(imp)) { alert('קובץ לא תקין'); return; }
+      if (!Array.isArray(imp)) { alert('Invalid file'); return; }
       const existing = new Set(recipes.map(r=>r.name.toLowerCase()));
       let n = 0;
       for (const r of imp) { if (!existing.has(r.name.toLowerCase())) { recipes.push({...r,id:Date.now()+n}); n++; } }
       save(); render();
-      alert(`יובאו ${n} מתכונים חדשים`);
-    } catch(e) { alert('שגיאה בקריאת הקובץ'); }
+      alert(`Imported ${n} new recipes`);
+    } catch(e) { alert('Error reading file'); }
   };
   reader.readAsText(f); e.target.value='';
 }
