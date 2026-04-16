@@ -370,10 +370,9 @@ let activeTime = 0; // 0 = any
 let activeIngs = new Set();
 
 const TIME_OPTIONS = [
-  { label: '15 min', max: 15 },
-  { label: '30 min', max: 30 },
-  { label: '45 min', max: 45 },
-  { label: '60+ min', max: 9999 }
+  { label: 'Up to 15 min', max: 15 },
+  { label: 'Up to 30 min', max: 30 },
+  { label: 'Up to 45 min', max: 45 }
 ];
 
 function renderFilters() {
@@ -422,10 +421,7 @@ function filtered() {
   return recipes.filter(r => {
     if (q && !(r.name+' '+r.ingredients.join(' ')+(r.notes||'')).toLowerCase().includes(q)) return false;
     if (activeCat && r.category !== activeCat) return false;
-    if (activeTime) {
-      if (activeTime === 9999) { if ((r.prepTime||0) < 60) return false; }
-      else { if (!r.prepTime || r.prepTime > activeTime) return false; }
-    }
+    if (activeTime && (!r.prepTime || r.prepTime > activeTime)) return false;
     if (activeIngs.size > 0) {
       const rIngs = r.ingredients.join(' ').toLowerCase();
       for (const ing of activeIngs) { if (!rIngs.includes(ing)) return false; }
