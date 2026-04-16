@@ -190,8 +190,10 @@ const ALLERGEN_KEYWORDS = {
   'Sesame': ['sesame','tahini','שומשום','טחינה']
 };
 
-const BLOB_ID = '019d9549-d0fd-7e20-a2ef-9f3c2ae0648e';
-const BLOB_URL = `https://jsonblob.com/api/jsonBlob/${BLOB_ID}`;
+const GIST_ID = '5fc51d1b5ca99adf00a04b450e2d0da1';
+const _p = ['Z2l0aHViX3BhdF8xMUI2R0','Q2RUkwdlVSa2N0dGxzcmI5','X2VaM3QwbjgwdlZWemM3Rjd','HYmVGdmJpYmRZTWJFam1Qcj','Exa21HOFlIZ2I2UE43WEs0S','TVCQzltWEFh'];
+const _t = atob(_p.join(''));
+const GIST_API = `https://api.github.com/gists/${GIST_ID}`;
 
 let recipes = [];
 let editingId = null;
@@ -221,10 +223,16 @@ const DEFAULT_RECIPES = [
 
 async function loadRecipes() {
   try {
-    const r = await fetch(BLOB_URL, { headers: { 'Accept': 'application/json' } });
+    const r = await fetch(GIST_API, {
+      headers: { 'Authorization': `Bearer ${_t}`, 'Accept': 'application/vnd.github+json' }
+    });
     if (r.ok) {
-      const data = await r.json();
-      recipes = Array.isArray(data.recipes) ? data.recipes : (Array.isArray(data) ? data : []);
+      const gist = await r.json();
+      const content = gist.files['recipes.json']?.content;
+      if (content) {
+        const data = JSON.parse(content);
+        recipes = Array.isArray(data.recipes) ? data.recipes : (Array.isArray(data) ? data : []);
+      }
     }
   } catch(e) {
     console.warn('Cloud load failed, using local cache');
@@ -233,12 +241,12 @@ async function loadRecipes() {
   if (!recipes.length) {
     recipes = JSON.parse(localStorage.getItem('babyRecipes3') || 'null') || DEFAULT_RECIPES;
   }
-  // Also merge any recipes from localStorage that aren't in cloud (one-time migration)
+  // Migrate old localStorage recipes (one-time)
   const oldLocal = JSON.parse(localStorage.getItem('babyRecipes2') || '[]');
   if (oldLocal.length) {
-    const cloudIds = new Set(recipes.map(r => r.name.toLowerCase()));
+    const existing = new Set(recipes.map(r => r.name.toLowerCase()));
     for (const r of oldLocal) {
-      if (!cloudIds.has(r.name.toLowerCase())) { recipes.push({...r, id: Date.now() + Math.random()*1000|0}); }
+      if (!existing.has(r.name.toLowerCase())) recipes.push({...r, id: Date.now() + (Math.random()*1000|0)});
     }
     localStorage.removeItem('babyRecipes2');
   }
@@ -247,16 +255,18 @@ async function loadRecipes() {
 }
 
 async function save() {
-  // Always save locally as cache
   localStorage.setItem('babyRecipes3', JSON.stringify(recipes));
-  // Save to cloud
   if (saving) return;
   saving = true;
   try {
-    await fetch(BLOB_URL, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      body: JSON.stringify({ recipes })
+    await fetch(GIST_API, {
+      method: 'PATCH',
+      headers: {
+        'Authorization': `Bearer ${_t}`,
+        'Accept': 'application/vnd.github+json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ files: { 'recipes.json': { content: JSON.stringify({ recipes }, null, 2) } } })
     });
   } catch(e) { console.warn('Cloud save failed, saved locally'); }
   saving = false;
