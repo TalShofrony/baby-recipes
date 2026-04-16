@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,955 +10,575 @@
     --primary-dark: #e76f51;
     --secondary: #2a9d8f;
     --bg: #fef9f3;
-    --card-bg: #ffffff;
+    --card-bg: #fff;
     --text: #264653;
     --text-light: #6b7280;
-    --allergen: #e63946;
-    --allergen-bg: #fde8e8;
+    --allergen: #c0392b;
+    --allergen-bg: #fdecea;
     --border: #e5e7eb;
     --shadow: 0 2px 8px rgba(0,0,0,0.08);
   }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Segoe UI',system-ui,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+  header { background:linear-gradient(135deg,var(--primary),var(--primary-dark)); color:#fff; padding:1.2rem; text-align:center; }
+  header h1 { font-size:1.6rem; }
 
-  body {
-    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
+  .container { max-width:850px; margin:0 auto; padding:1rem; }
+
+  .controls { display:flex; flex-wrap:wrap; gap:0.6rem; align-items:center; margin-bottom:1rem; }
+  .search-box { flex:1; min-width:180px; padding:0.55rem 1rem; border:2px solid var(--border); border-radius:25px; font-size:0.95rem; outline:none; }
+  .search-box:focus { border-color:var(--primary); }
+
+  .btn { padding:0.5rem 1rem; border:none; border-radius:20px; font-size:0.85rem; font-weight:600; cursor:pointer; }
+  .btn-primary { background:var(--primary); color:#fff; }
+  .btn-secondary { background:var(--secondary); color:#fff; }
+  .btn-danger { background:var(--allergen); color:#fff; font-size:0.75rem; padding:0.3rem 0.6rem; }
+  .btn-outline { background:transparent; border:2px solid var(--border); color:var(--text); }
+  .btn-sm { padding:0.3rem 0.65rem; font-size:0.78rem; }
+
+  /* Category filter */
+  .cat-bar { display:flex; flex-wrap:wrap; gap:0.35rem; margin-bottom:1rem; }
+  .cat-chip {
+    padding:0.3rem 0.7rem; border-radius:15px; font-size:0.8rem;
+    cursor:pointer; border:1.5px solid var(--border); background:#fff;
+    user-select:none; transition:all 0.15s;
   }
+  .cat-chip:hover { border-color:var(--secondary); }
+  .cat-chip.active { background:var(--secondary); color:#fff; border-color:var(--secondary); }
 
-  header {
-    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-    color: white;
-    padding: 1.5rem 2rem;
-    text-align: center;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.1);
-  }
-
-  header h1 { font-size: 1.8rem; font-weight: 700; }
-  header p { opacity: 0.9; margin-top: 0.3rem; font-size: 0.95rem; }
-
-  .container { max-width: 900px; margin: 0 auto; padding: 1.5rem; }
-
-  /* Controls bar */
-  .controls {
-    display: flex; flex-wrap: wrap; gap: 0.75rem;
-    align-items: center; margin-bottom: 1.5rem;
-  }
-
-  .search-box {
-    flex: 1; min-width: 200px;
-    padding: 0.6rem 1rem; border: 2px solid var(--border);
-    border-radius: 25px; font-size: 0.95rem; outline: none;
-    transition: border-color 0.2s;
-  }
-  .search-box:focus { border-color: var(--primary); }
-
-  .btn {
-    padding: 0.6rem 1.2rem; border: none; border-radius: 25px;
-    font-size: 0.9rem; font-weight: 600; cursor: pointer;
-    transition: transform 0.15s, box-shadow 0.15s;
-  }
-  .btn:hover { transform: translateY(-1px); box-shadow: var(--shadow); }
-  .btn:active { transform: translateY(0); }
-
-  .btn-primary { background: var(--primary); color: white; }
-  .btn-secondary { background: var(--secondary); color: white; }
-  .btn-danger { background: var(--allergen); color: white; }
-  .btn-outline {
-    background: transparent; border: 2px solid var(--border);
-    color: var(--text);
-  }
-  .btn-outline.active { border-color: var(--secondary); background: var(--secondary); color: white; }
-  .btn-sm { padding: 0.35rem 0.75rem; font-size: 0.8rem; }
-
-  /* Filter tags */
-  .filter-section { margin-bottom: 1.5rem; }
-  .filter-section h3 { font-size: 0.85rem; color: var(--text-light); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; }
-  .filter-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; }
-  .filter-tag {
-    padding: 0.3rem 0.7rem; border-radius: 15px; font-size: 0.8rem;
-    cursor: pointer; border: 1.5px solid var(--border); background: white;
-    transition: all 0.15s; user-select: none;
-  }
-  .filter-tag:hover { border-color: var(--secondary); }
-  .filter-tag.active { background: var(--secondary); color: white; border-color: var(--secondary); }
-  .filter-tag.allergen-tag { border-color: #f5c6c6; }
-  .filter-tag.allergen-tag.active { background: var(--allergen); border-color: var(--allergen); }
-
-  /* Recipe cards */
-  .recipe-grid { display: grid; gap: 1rem; }
-
+  /* Cards */
+  .recipe-grid { display:grid; gap:0.8rem; }
   .recipe-card {
-    background: var(--card-bg); border-radius: 12px;
-    box-shadow: var(--shadow); overflow: hidden;
-    transition: transform 0.2s, box-shadow 0.2s;
-    cursor: pointer;
+    background:var(--card-bg); border-radius:10px; box-shadow:var(--shadow);
+    overflow:hidden; cursor:pointer; transition:transform 0.15s;
   }
-  .recipe-card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
+  .recipe-card:hover { transform:translateY(-1px); }
 
-  .recipe-card-header {
-    padding: 1rem 1.2rem; display: flex; justify-content: space-between; align-items: flex-start;
-  }
-  .recipe-card-header h2 { font-size: 1.15rem; font-weight: 600; unicode-bidi: plaintext; }
-  [dir="rtl"] { text-align: right; }
-  .recipe-age { font-size: 0.75rem; background: var(--primary); color: white; padding: 0.2rem 0.6rem; border-radius: 10px; white-space: nowrap; }
+  .card-top { padding:0.8rem 1rem; display:flex; justify-content:space-between; align-items:flex-start; gap:0.5rem; }
+  .card-top h2 { font-size:1.05rem; font-weight:600; }
+  .card-cat { font-size:0.72rem; background:var(--secondary); color:#fff; padding:0.15rem 0.5rem; border-radius:8px; white-space:nowrap; flex-shrink:0; }
 
-  .recipe-card-body { padding: 0 1.2rem 1rem; }
+  .card-chips { padding:0 1rem 0.7rem; display:flex; flex-wrap:wrap; gap:0.3rem; }
+  .chip { font-size:0.75rem; padding:0.15rem 0.45rem; border-radius:8px; background:#f0f0f0; }
+  .chip.allergen { background:var(--allergen-bg); color:var(--allergen); font-weight:600; }
 
-  .ingredient-list { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 0.5rem; }
-  .ingredient-chip {
-    font-size: 0.78rem; padding: 0.2rem 0.55rem;
-    border-radius: 10px; background: #f0f0f0;
-  }
-  .ingredient-chip.allergen {
-    background: var(--allergen-bg); color: var(--allergen);
-    font-weight: 600; border: 1px solid #f5c6c6;
-  }
-
-  .recipe-meta { font-size: 0.8rem; color: var(--text-light); }
-
-  /* Expanded recipe view */
-  .recipe-expanded { display: none; padding: 0 1.2rem 1.2rem; border-top: 1px solid var(--border); margin-top: 0.5rem; }
-  .recipe-expanded.show { display: block; }
-  .recipe-expanded h3 { font-size: 0.95rem; margin: 0.8rem 0 0.4rem; color: var(--text); }
-  .recipe-expanded ul { padding-left: 1.2rem; }
-  .recipe-expanded li { margin-bottom: 0.3rem; font-size: 0.9rem; line-height: 1.5; unicode-bidi: plaintext; }
-  .recipe-expanded ol { padding-left: 1.2rem; }
-  .recipe-expanded ol li { margin-bottom: 0.5rem; font-size: 0.9rem; line-height: 1.5; }
-  .recipe-expanded .allergen-warning {
-    background: var(--allergen-bg); border: 1px solid #f5c6c6;
-    border-radius: 8px; padding: 0.6rem 0.8rem; margin-top: 0.8rem;
-    font-size: 0.85rem; color: var(--allergen);
-  }
-  .recipe-expanded .source-link { font-size: 0.8rem; color: var(--secondary); margin-top: 0.5rem; display: block; }
-  .recipe-actions { display: flex; gap: 0.5rem; margin-top: 0.8rem; }
+  .card-detail { display:none; padding:0 1rem 1rem; border-top:1px solid var(--border); }
+  .card-detail.show { display:block; }
+  .card-detail h3 { font-size:0.9rem; margin:0.7rem 0 0.3rem; }
+  .card-detail li { font-size:0.88rem; line-height:1.5; margin-bottom:0.2rem; }
+  .card-detail ul, .card-detail ol { padding-inline-start:1.2rem; }
+  .allergen-note { font-size:0.8rem; color:var(--allergen); margin-top:0.5rem; }
+  .source-link { font-size:0.78rem; color:var(--secondary); display:block; margin-top:0.4rem; }
+  .card-actions { display:flex; gap:0.4rem; margin-top:0.6rem; }
 
   /* Modal */
-  .modal-overlay {
-    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
-    z-index: 100; justify-content: center; align-items: flex-start;
-    padding: 2rem; overflow-y: auto;
-  }
-  .modal-overlay.show { display: flex; }
+  .overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:100; justify-content:center; align-items:flex-start; padding:1.5rem; overflow-y:auto; }
+  .overlay.show { display:flex; }
+  .modal { background:#fff; border-radius:14px; width:100%; max-width:550px; }
+  .modal-head { padding:1rem 1.2rem; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
+  .modal-head h2 { font-size:1.1rem; }
+  .modal-close { background:none; border:none; font-size:1.4rem; cursor:pointer; color:var(--text-light); }
+  .modal-body { padding:1.2rem; }
 
-  .modal {
-    background: white; border-radius: 16px; width: 100%; max-width: 600px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.2); animation: slideUp 0.25s ease;
-  }
-  @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  .tabs { display:flex; border-bottom:2px solid var(--border); margin-bottom:1rem; }
+  .tab { padding:0.5rem 1rem; border:none; background:none; font-size:0.88rem; font-weight:600; cursor:pointer; color:var(--text-light); border-bottom:2px solid transparent; margin-bottom:-2px; }
+  .tab.active { color:var(--primary-dark); border-bottom-color:var(--primary-dark); }
 
-  .modal-header {
-    padding: 1.2rem 1.5rem; border-bottom: 1px solid var(--border);
-    display: flex; justify-content: space-between; align-items: center;
-  }
-  .modal-header h2 { font-size: 1.2rem; }
-  .modal-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-light); padding: 0.2rem; }
+  .field { margin-bottom:0.8rem; }
+  .field label { display:block; font-size:0.82rem; font-weight:600; margin-bottom:0.25rem; }
+  .field input, .field textarea, .field select { width:100%; padding:0.5rem 0.7rem; border:2px solid var(--border); border-radius:8px; font-size:0.88rem; outline:none; font-family:inherit; }
+  .field input:focus, .field textarea:focus { border-color:var(--primary); }
+  .field textarea { min-height:90px; resize:vertical; }
+  .field .hint { font-size:0.75rem; color:var(--text-light); margin-top:0.15rem; }
 
-  .modal-body { padding: 1.5rem; }
+  .cat-select { display:flex; flex-wrap:wrap; gap:0.4rem; }
+  .cat-option { padding:0.3rem 0.65rem; border:1.5px solid var(--border); border-radius:8px; font-size:0.82rem; cursor:pointer; user-select:none; }
+  .cat-option.active { border-color:var(--secondary); background:var(--secondary); color:#fff; }
 
-  .tab-bar { display: flex; gap: 0; margin-bottom: 1.2rem; border-bottom: 2px solid var(--border); }
-  .tab {
-    padding: 0.6rem 1.2rem; border: none; background: none; font-size: 0.9rem;
-    font-weight: 600; cursor: pointer; color: var(--text-light);
-    border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.2s;
-  }
-  .tab.active { color: var(--primary-dark); border-bottom-color: var(--primary-dark); }
+  .empty { text-align:center; padding:2.5rem 1rem; color:var(--text-light); }
+  .data-bar { text-align:center; margin-top:1.5rem; padding-top:0.8rem; border-top:1px solid var(--border); }
+  .data-bar .btn { margin:0 0.2rem; }
 
-  .form-group { margin-bottom: 1rem; }
-  .form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.3rem; }
-  .form-group input, .form-group textarea, .form-group select {
-    width: 100%; padding: 0.6rem 0.8rem; border: 2px solid var(--border);
-    border-radius: 8px; font-size: 0.9rem; outline: none; font-family: inherit;
-    transition: border-color 0.2s;
-  }
-  .form-group input:focus, .form-group textarea:focus { border-color: var(--primary); }
-  .form-group textarea { min-height: 100px; resize: vertical; }
-  .form-group .hint { font-size: 0.78rem; color: var(--text-light); margin-top: 0.2rem; }
-
-  .checkbox-group { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-  .checkbox-label {
-    display: flex; align-items: center; gap: 0.3rem; font-size: 0.85rem;
-    padding: 0.3rem 0.6rem; border: 1.5px solid var(--border); border-radius: 8px;
-    cursor: pointer; transition: all 0.15s; user-select: none;
-  }
-  .checkbox-label:has(input:checked) { border-color: var(--allergen); background: var(--allergen-bg); color: var(--allergen); font-weight: 600; }
-  .checkbox-label input { display: none; }
-
-  .import-area {
-    border: 2px dashed var(--border); border-radius: 12px; padding: 2rem;
-    text-align: center; margin-bottom: 1rem;
-  }
-
-  .empty-state {
-    text-align: center; padding: 3rem 1rem; color: var(--text-light);
-  }
-  .empty-state .emoji { font-size: 3rem; margin-bottom: 0.5rem; }
-  .empty-state p { font-size: 0.95rem; }
-
-  /* Export/Import data */
-  .data-actions { text-align: center; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--border); }
-  .data-actions .btn { margin: 0 0.3rem; }
-
-  @media (max-width: 600px) {
-    header h1 { font-size: 1.4rem; }
-    .container { padding: 1rem; }
-    .controls { flex-direction: column; }
-    .search-box { width: 100%; }
+  @media(max-width:600px) {
+    .container { padding:0.7rem; }
+    .controls { flex-direction:column; }
+    .search-box { width:100%; }
   }
 </style>
 </head>
 <body>
 
-<header>
-  <h1>Baby Recipes</h1>
-  <p>Healthy meals for our little one</p>
-</header>
+<header><h1>Baby Recipes</h1></header>
 
 <div class="container">
   <div class="controls">
-    <input type="text" class="search-box" id="searchBox" placeholder="Search recipes or ingredients...">
-    <button class="btn btn-primary" onclick="openAddModal()">+ Add Recipe</button>
+    <input type="text" class="search-box" id="searchBox" placeholder="...חיפוש לפי שם או מצרך">
+    <button class="btn btn-primary" onclick="openModal()">+ הוספת מתכון</button>
   </div>
-
-  <div class="filter-section" id="filterSection" style="display:none;">
-    <h3>Filter by Ingredient</h3>
-    <div class="filter-tags" id="ingredientFilters"></div>
-  </div>
-
-  <div class="filter-section" id="allergenFilterSection" style="display:none;">
-    <h3>Allergens</h3>
-    <div class="filter-tags" id="allergenFilters"></div>
-  </div>
-
-  <div class="recipe-grid" id="recipeGrid"></div>
-
-  <div class="data-actions">
-    <button class="btn btn-outline btn-sm" onclick="exportRecipes()">Export All</button>
-    <button class="btn btn-outline btn-sm" onclick="document.getElementById('importFile').click()">Import</button>
-    <input type="file" id="importFile" accept=".json" style="display:none" onchange="importRecipes(event)">
+  <div class="cat-bar" id="catBar"></div>
+  <div class="recipe-grid" id="grid"></div>
+  <div class="data-bar">
+    <button class="btn btn-outline btn-sm" onclick="exportAll()">ייצוא</button>
+    <button class="btn btn-outline btn-sm" onclick="document.getElementById('impFile').click()">ייבוא</button>
+    <input type="file" id="impFile" accept=".json" style="display:none" onchange="importAll(event)">
   </div>
 </div>
 
-<!-- Add Recipe Modal -->
-<div class="modal-overlay" id="addModal">
+<!-- Modal -->
+<div class="overlay" id="modal">
   <div class="modal">
-    <div class="modal-header">
-      <h2 id="modalTitle">Add Recipe</h2>
+    <div class="modal-head">
+      <h2 id="modalTitle">הוספת מתכון</h2>
       <button class="modal-close" onclick="closeModal()">&times;</button>
     </div>
     <div class="modal-body">
-      <div class="tab-bar">
-        <button class="tab active" onclick="switchTab('manual', this)">Manual Entry</button>
-        <button class="tab" onclick="switchTab('url', this)">From URL / Text</button>
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab('manual',this)">הזנה ידנית</button>
+        <button class="tab" onclick="switchTab('paste',this)">הדבקת טקסט / קישור</button>
       </div>
 
-      <!-- Manual entry tab -->
       <div id="tab-manual">
-        <div class="form-group">
-          <label>Recipe Name *</label>
-          <input type="text" id="recipeName" placeholder="e.g., Sweet Potato Puree">
+        <div class="field">
+          <label>שם המתכון *</label>
+          <input type="text" id="fName" placeholder="לדוגמא: מאפינס בננה">
         </div>
-        <div class="form-group">
-          <label>Age Range</label>
-          <select id="recipeAge">
-            <option value="6+">6+ months</option>
-            <option value="8+">8+ months</option>
-            <option value="10+">10+ months</option>
-            <option value="12+">12+ months</option>
-            <option value="18+">18+ months</option>
-          </select>
+        <div class="field">
+          <label>קטגוריה</label>
+          <div class="cat-select" id="catPicker"></div>
         </div>
-        <div class="form-group">
-          <label>Ingredients *</label>
-          <textarea id="recipeIngredients" placeholder="One ingredient per line, e.g.:&#10;1 sweet potato&#10;1 tbsp olive oil&#10;Pinch of cinnamon"></textarea>
+        <div class="field">
+          <label>מצרכים *</label>
+          <textarea id="fIng" placeholder="מצרך אחד בכל שורה:&#10;1 בננה בשלה&#10;1 ביצה&#10;3 כפות קמח שיבולת שועל"></textarea>
         </div>
-        <div class="form-group">
-          <label>Steps *</label>
-          <textarea id="recipeSteps" placeholder="One step per line, e.g.:&#10;Peel and dice the sweet potato&#10;Steam for 15 minutes until soft&#10;Mash with olive oil and cinnamon"></textarea>
+        <div class="field">
+          <label>הוראות הכנה *</label>
+          <textarea id="fSteps" placeholder="שלב אחד בכל שורה:&#10;לחמם תנור ל-180&#10;לערבב את כל החומרים&#10;לאפות 25 דקות"></textarea>
         </div>
-        <div class="form-group">
-          <label>Allergens</label>
-          <div class="hint">Auto-detected from ingredients, or select manually:</div>
-          <div class="checkbox-group" id="allergenCheckboxes"></div>
+        <div class="field">
+          <label>הערות (אופציונלי)</label>
+          <textarea id="fNotes" placeholder="טיפים, וריאציות, אחסון..." style="min-height:50px"></textarea>
         </div>
-        <div class="form-group">
-          <label>Notes (optional)</label>
-          <textarea id="recipeNotes" placeholder="Tips, variations, storage info..." style="min-height:60px"></textarea>
-        </div>
-        <button class="btn btn-primary" onclick="saveManualRecipe()" style="width:100%">Save Recipe</button>
+        <button class="btn btn-primary" onclick="saveRecipe()" style="width:100%">שמירה</button>
       </div>
 
-      <!-- URL / text import tab -->
-      <div id="tab-url" style="display:none;">
-        <div class="import-area">
-          <p style="font-size:1.5rem; margin-bottom:0.5rem">&#x1F4CB;</p>
-          <p><strong>Paste recipe text or URL</strong></p>
-          <p style="font-size:0.82rem; color:var(--text-light); margin-top:0.3rem">
-            Paste the full recipe text from any website, or a URL to try auto-import
-          </p>
+      <div id="tab-paste" style="display:none">
+        <div class="field">
+          <label>הדבקת טקסט מתכון או קישור *</label>
+          <textarea id="fPaste" placeholder="אפשרות 1: להדביק קישור&#10;https://example.com/recipe/...&#10;&#10;אפשרות 2: להדביק את הטקסט המלא מהאתר&#10;(סמן הכל → העתק → הדבק כאן)" style="min-height:160px"></textarea>
+          <div class="hint">עובד הכי טוב עם הדבקת טקסט ישירות מהאתר (Ctrl+A → Ctrl+C)</div>
         </div>
-        <div class="form-group">
-          <label>Recipe URL or Full Text *</label>
-          <textarea id="importInput" placeholder="Paste a URL like https://example.com/recipe/baby-puree&#10;&#10;Or paste the full recipe text:&#10;Sweet Potato Puree&#10;Ingredients: 1 sweet potato, 1 tbsp butter...&#10;Instructions: Peel and dice..." style="min-height:150px"></textarea>
-        </div>
-        <button class="btn btn-secondary" onclick="analyzeImport()" style="width:100%" id="analyzeBtn">Analyze & Import</button>
-        <div id="importPreview" style="display:none; margin-top:1rem;"></div>
+        <button class="btn btn-secondary" onclick="analyzeImport()" style="width:100%" id="analyzeBtn">ניתוח וייבוא</button>
+        <div id="preview" style="display:none; margin-top:0.8rem;"></div>
       </div>
     </div>
   </div>
 </div>
 
 <script>
-const COMMON_ALLERGENS = ['Milk/Dairy', 'Eggs', 'Peanuts', 'Tree Nuts', 'Wheat/Gluten', 'Soy', 'Fish', 'Shellfish', 'Sesame'];
+const CATEGORIES = ['מאפינס','פנקייק','מרק','פיורה','פסטה','אורז','ירקות','בשר','דגים','חטיפים','קינוח','אחר'];
 
 const ALLERGEN_KEYWORDS = {
-  'Milk/Dairy': ['milk','cream','butter','cheese','yogurt','yoghurt','ghee','whey','casein','dairy','ricotta','mozzarella','parmesan','cheddar','cottage cheese','חלב','שמנת','חמאה','גבינה','יוגורט','שמנת','קוטג','מוצרלה','פרמזן'],
-  'Eggs': ['egg','eggs','yolk','whites','mayonnaise','mayo','ביצה','ביצים','חלמון','חלבון','מיונז'],
-  'Peanuts': ['peanut','peanuts','peanut butter','בוטנים','חמאת בוטנים','בוטן'],
-  'Tree Nuts': ['almond','cashew','walnut','pecan','pistachio','hazelnut','macadamia','brazil nut','pine nut','chestnut','שקד','שקדים','קשיו','אגוז','אגוזים','פקאן','פיסטוק','אגוז לוז','צנובר'],
-  'Wheat/Gluten': ['wheat','flour','bread','pasta','noodle','couscous','semolina','bulgur','farina','breadcrumb','panko','tortilla','pita','cracker','חיטה','קמח','לחם','פסטה','אטריות','קוסקוס','בורגול','פתיתים','פיתה','קרקר'],
-  'Soy': ['soy','soya','tofu','tempeh','edamame','miso','soy sauce','סויה','טופו','אדממה','מיסו','רוטב סויה'],
-  'Fish': ['fish','salmon','tuna','cod','tilapia','trout','sardine','anchovy','bass','halibut','haddock','mackerel','דג','סלמון','טונה','בקלה','טילפיה','פורל','סרדין','אנשובי'],
-  'Shellfish': ['shrimp','prawn','crab','lobster','mussel','clam','oyster','scallop','calamari','squid','שרימפס','חסילון','סרטן','לובסטר','קלמארי','דיונון'],
-  'Sesame': ['sesame','tahini','hummus','שומשום','טחינה','חומוס']
+  'חלב': ['milk','cream','butter','cheese','yogurt','yoghurt','ghee','dairy','חלב','שמנת','חמאה','גבינה','יוגורט','קוטג','מוצרלה','פרמזן','שמנת'],
+  'ביצים': ['egg','eggs','yolk','mayo','ביצה','ביצים','חלמון','מיונז'],
+  'בוטנים': ['peanut','peanut butter','בוטנים','חמאת בוטנים','בוטן'],
+  'אגוזי עץ': ['almond','cashew','walnut','pecan','pistachio','hazelnut','שקד','שקדים','קשיו','אגוז','אגוזים','פקאן','פיסטוק','צנובר'],
+  'גלוטן': ['wheat','flour','bread','pasta','noodle','couscous','semolina','bulgur','breadcrumb','panko','pita','חיטה','קמח','לחם','פסטה','אטריות','קוסקוס','בורגול','פתיתים','פיתה'],
+  'סויה': ['soy','soya','tofu','tempeh','edamame','miso','סויה','טופו','אדממה','מיסו'],
+  'דגים': ['fish','salmon','tuna','cod','tilapia','sardine','דג','סלמון','טונה','בקלה','טילפיה','פורל'],
+  'שומשום': ['sesame','tahini','שומשום','טחינה']
 };
 
-let recipes = JSON.parse(localStorage.getItem('babyRecipes') || '[]');
+let recipes = JSON.parse(localStorage.getItem('babyRecipes2') || '[]');
 let editingId = null;
-let activeIngredientFilters = new Set();
-let activeAllergenFilters = new Set();
+let activeCat = '';
 
-// Sample recipes to start with
 if (recipes.length === 0) {
   recipes = [
     {
-      id: 1,
-      name: "Sweet Potato Puree",
-      age: "6+",
-      ingredients: ["2 medium sweet potatoes", "1 tbsp olive oil", "Pinch of cinnamon"],
-      steps: ["Peel and dice the sweet potatoes into small cubes.", "Steam for 15 minutes until very soft.", "Blend with olive oil until smooth.", "Add a tiny pinch of cinnamon and mix well.", "Let cool before serving."],
-      allergens: [],
-      notes: "Great first food! Can be frozen in ice cube trays for easy portions.",
-      source: "",
-      createdAt: new Date().toISOString()
+      id: 1, name: "פיורה בטטה", category: "פיורה",
+      ingredients: ["2 בטטות בינוניות","1 כף שמן זית","קורט קינמון"],
+      steps: ["לקלף ולחתוך את הבטטות לקוביות","לאדות 15 דקות עד שרכות","לטחון עם שמן זית עד לקוואם חלק","להוסיף קורט קינמון ולערבב","לצנן לפני הגשה"],
+      allergens: [], notes: "אפשר להקפיא בתבנית קוביות קרח", source: ""
     },
     {
-      id: 2,
-      name: "Banana Oat Pancakes",
-      age: "8+",
-      ingredients: ["1 ripe banana", "1 egg", "3 tbsp oat flour", "1 tsp butter for cooking"],
-      steps: ["Mash banana in a bowl until smooth.", "Beat in the egg.", "Stir in oat flour until combined.", "Heat butter in a non-stick pan on low-medium heat.", "Drop small spoonfuls and cook 2 min per side.", "Cool and cut into finger-food strips."],
-      allergens: ["Eggs", "Wheat/Gluten", "Milk/Dairy"],
-      notes: "Perfect for baby-led weaning. Soft enough for gums!",
-      source: "",
-      createdAt: new Date().toISOString()
+      id: 2, name: "פנקייק בננה ושיבולת שועל", category: "פנקייק",
+      ingredients: ["1 בננה בשלה","1 ביצה","3 כפות קמח שיבולת שועל","1 כפית חמאה לטיגון"],
+      steps: ["למעוך את הבננה","לטרוף את הביצה ולערבב","להוסיף קמח שיבולת שועל","לחמם חמאה במחבת על אש קטנה","ליצוק כפות קטנות ולטגן 2 דקות מכל צד","לצנן ולחתוך לרצועות"],
+      allergens: ["ביצים","חלב"], notes: "מושלם לאכילה עצמאית!", source: ""
     },
     {
-      id: 3,
-      name: "Avocado Salmon Mash",
-      age: "8+",
-      ingredients: ["1/2 ripe avocado", "50g cooked salmon", "Squeeze of lemon juice"],
-      steps: ["Ensure salmon is fully cooked and flake with a fork.", "Mash avocado in a bowl.", "Combine salmon and avocado.", "Add a tiny squeeze of lemon juice.", "Mix until desired consistency."],
-      allergens: ["Fish"],
-      notes: "Great source of omega-3 fatty acids for brain development.",
-      source: "",
-      createdAt: new Date().toISOString()
+      id: 3, name: "מחית אבוקדו וסלמון", category: "דגים",
+      ingredients: ["חצי אבוקדו בשל","50 גרם סלמון מבושל","מעט מיץ לימון"],
+      steps: ["לוודא שהסלמון מבושל היטב ולפורר במזלג","למעוך את האבוקדו","לערבב יחד","להוסיף מעט מיץ לימון"],
+      allergens: ["דגים"], notes: "מקור מצוין לאומגה 3", source: ""
     }
   ];
-  saveToStorage();
+  save();
 }
 
-function saveToStorage() {
-  localStorage.setItem('babyRecipes', JSON.stringify(recipes));
-}
+function save() { localStorage.setItem('babyRecipes2', JSON.stringify(recipes)); }
 
-function getAllIngredients() {
-  const all = new Set();
-  recipes.forEach(r => {
-    r.ingredients.forEach(ing => {
-      const clean = ing.replace(/^[\d\/\.\,\s]+(tbsp|tsp|cup|cups|g|kg|ml|l|oz|lb|pinch|handful|medium|large|small|ripe|cooked|fresh)?\s*/i, '').trim();
-      if (clean) all.add(clean.toLowerCase());
-    });
-  });
-  return [...all].sort();
-}
-
-function getAllAllergens() {
-  const all = new Set();
-  recipes.forEach(r => r.allergens.forEach(a => all.add(a)));
-  return [...all].sort();
-}
-
-function detectAllergens(ingredientText) {
-  const detected = new Set();
-  const lower = ingredientText.toLowerCase();
-  for (const [allergen, keywords] of Object.entries(ALLERGEN_KEYWORDS)) {
-    for (const kw of keywords) {
-      if (lower.includes(kw)) { detected.add(allergen); break; }
-    }
+function detectAllergens(text) {
+  const lower = text.toLowerCase();
+  const found = [];
+  for (const [name, kws] of Object.entries(ALLERGEN_KEYWORDS)) {
+    if (kws.some(kw => lower.includes(kw))) found.push(name);
   }
-  return [...detected];
+  return found;
 }
 
-function isAllergenIngredient(ingredient) {
-  const lower = ingredient.toLowerCase();
-  for (const keywords of Object.values(ALLERGEN_KEYWORDS)) {
-    for (const kw of keywords) {
-      if (lower.includes(kw)) return true;
-    }
+function isAllergenIng(ing) {
+  const lower = ing.toLowerCase();
+  for (const kws of Object.values(ALLERGEN_KEYWORDS)) {
+    if (kws.some(kw => lower.includes(kw))) return true;
   }
   return false;
 }
 
-function renderFilters() {
-  const ingredients = getAllIngredients();
-  const allergens = getAllAllergens();
-
-  const filterSection = document.getElementById('filterSection');
-  const allergenSection = document.getElementById('allergenFilterSection');
-
-  if (ingredients.length > 0) {
-    filterSection.style.display = '';
-    document.getElementById('ingredientFilters').innerHTML = ingredients.map(ing =>
-      `<span class="filter-tag ${activeIngredientFilters.has(ing) ? 'active' : ''}" onclick="toggleIngFilter('${ing.replace(/'/g, "\\'")}')">${ing}</span>`
-    ).join('');
-  } else {
-    filterSection.style.display = 'none';
-  }
-
-  if (allergens.length > 0) {
-    allergenSection.style.display = '';
-    document.getElementById('allergenFilters').innerHTML = allergens.map(a =>
-      `<span class="filter-tag allergen-tag ${activeAllergenFilters.has(a) ? 'active' : ''}" onclick="toggleAllergenFilter('${a}')">&#9888; ${a}</span>`
-    ).join('');
-  } else {
-    allergenSection.style.display = 'none';
-  }
+function getAllCats() {
+  const s = new Set();
+  recipes.forEach(r => { if (r.category) s.add(r.category); });
+  return [...s].sort();
 }
 
-function toggleIngFilter(ing) {
-  if (activeIngredientFilters.has(ing)) activeIngredientFilters.delete(ing);
-  else activeIngredientFilters.add(ing);
-  render();
+function esc(str) { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
+
+function renderCatBar() {
+  const cats = getAllCats();
+  document.getElementById('catBar').innerHTML = cats.length === 0 ? '' :
+    cats.map(c => `<span class="cat-chip ${activeCat===c?'active':''}" onclick="toggleCat('${esc(c)}')">${esc(c)}</span>`).join('');
 }
 
-function toggleAllergenFilter(a) {
-  if (activeAllergenFilters.has(a)) activeAllergenFilters.delete(a);
-  else activeAllergenFilters.add(a);
-  render();
-}
+function toggleCat(c) { activeCat = activeCat === c ? '' : c; render(); }
 
-function filterRecipes() {
-  const query = document.getElementById('searchBox').value.toLowerCase().trim();
+function filtered() {
+  const q = document.getElementById('searchBox').value.toLowerCase().trim();
   return recipes.filter(r => {
-    if (query) {
-      const haystack = (r.name + ' ' + r.ingredients.join(' ') + ' ' + (r.notes || '')).toLowerCase();
-      if (!haystack.includes(query)) return false;
-    }
-    if (activeIngredientFilters.size > 0) {
-      const rIngs = r.ingredients.join(' ').toLowerCase();
-      for (const f of activeIngredientFilters) {
-        if (!rIngs.includes(f)) return false;
-      }
-    }
-    if (activeAllergenFilters.size > 0) {
-      for (const a of activeAllergenFilters) {
-        if (!r.allergens.includes(a)) return false;
-      }
-    }
+    if (q && !(r.name+' '+r.ingredients.join(' ')+(r.notes||'')).toLowerCase().includes(q)) return false;
+    if (activeCat && r.category !== activeCat) return false;
     return true;
   });
 }
 
-function renderRecipes() {
-  const grid = document.getElementById('recipeGrid');
-  const filtered = filterRecipes();
+function renderGrid() {
+  const g = document.getElementById('grid');
+  const list = filtered();
+  if (!list.length) { g.innerHTML = `<div class="empty">${recipes.length?'אין תוצאות':'אין מתכונים עדיין. הוסיפו את הראשון!'}</div>`; return; }
 
-  if (filtered.length === 0) {
-    grid.innerHTML = `
-      <div class="empty-state">
-        <div class="emoji">&#x1F37C;</div>
-        <p>${recipes.length === 0 ? 'No recipes yet. Add your first one!' : 'No recipes match your search.'}</p>
-      </div>`;
-    return;
-  }
-
-  grid.innerHTML = filtered.map(r => `
-    <div class="recipe-card" id="card-${r.id}">
-      <div class="recipe-card-header" onclick="toggleExpand(${r.id})">
-        <div dir="auto">
-          <h2>${escHtml(r.name)}</h2>
-          <div class="ingredient-list" style="margin-top:0.4rem">
-            ${r.ingredients.map(i => `<span class="ingredient-chip ${isAllergenIngredient(i) ? 'allergen' : ''}">${isAllergenIngredient(i) ? '&#9888; ' : ''}${escHtml(i)}</span>`).join('')}
-          </div>
-        </div>
-        <span class="recipe-age">${escHtml(r.age)} mo</span>
+  g.innerHTML = list.map(r => `
+    <div class="recipe-card">
+      <div class="card-top" onclick="toggle(${r.id})">
+        <h2>${esc(r.name)}</h2>
+        ${r.category ? `<span class="card-cat">${esc(r.category)}</span>` : ''}
       </div>
-      <div class="recipe-card-body">
-        ${r.allergens.length > 0 ? `<div class="recipe-meta">&#9888; Contains: ${r.allergens.join(', ')}</div>` : ''}
+      <div class="card-chips" onclick="toggle(${r.id})">
+        ${r.ingredients.map(i => `<span class="chip ${isAllergenIng(i)?'allergen':''}">${esc(i)}</span>`).join('')}
       </div>
-      <div class="recipe-expanded" id="expanded-${r.id}" dir="auto">
-        <h3>Ingredients</h3>
-        <ul>${r.ingredients.map(i => `<li>${isAllergenIngredient(i) ? '<strong style="color:var(--allergen)">&#9888; ' + escHtml(i) + '</strong>' : escHtml(i)}</li>`).join('')}</ul>
-        <h3>Steps</h3>
-        <ol>${r.steps.map(s => `<li>${escHtml(s)}</li>`).join('')}</ol>
-        ${r.allergens.length > 0 ? `<div class="allergen-warning">&#9888; <strong>Allergen Alert:</strong> This recipe contains <strong>${r.allergens.join(', ')}</strong>. Introduce one new allergen at a time and watch for reactions for 3-5 days.</div>` : ''}
-        ${r.notes ? `<p style="margin-top:0.6rem; font-size:0.85rem; color:var(--text-light)">&#x1F4A1; ${escHtml(r.notes)}</p>` : ''}
-        ${r.source ? `<a href="${escHtml(r.source)}" target="_blank" rel="noopener" class="source-link">&#x1F517; Original recipe</a>` : ''}
-        <div class="recipe-actions">
-          <button class="btn btn-outline btn-sm" onclick="editRecipe(${r.id}); event.stopPropagation();">Edit</button>
-          <button class="btn btn-danger btn-sm" onclick="deleteRecipe(${r.id}); event.stopPropagation();">Delete</button>
+      <div class="card-detail" id="d${r.id}">
+        <h3>מצרכים</h3>
+        <ul>${r.ingredients.map(i => `<li>${isAllergenIng(i)?'<strong style="color:var(--allergen)">'+esc(i)+'</strong>':esc(i)}</li>`).join('')}</ul>
+        <h3>הוראות הכנה</h3>
+        <ol>${r.steps.map(s => `<li>${esc(s)}</li>`).join('')}</ol>
+        ${r.allergens.length ? `<div class="allergen-note">אלרגנים: ${r.allergens.join(', ')}</div>` : ''}
+        ${r.notes ? `<p style="margin-top:0.4rem;font-size:0.82rem;color:var(--text-light)">${esc(r.notes)}</p>` : ''}
+        ${r.source ? `<a href="${esc(r.source)}" target="_blank" rel="noopener" class="source-link">מתכון מקורי</a>` : ''}
+        <div class="card-actions">
+          <button class="btn btn-outline btn-sm" onclick="editR(${r.id});event.stopPropagation()">עריכה</button>
+          <button class="btn btn-danger btn-sm" onclick="delR(${r.id});event.stopPropagation()">מחיקה</button>
         </div>
       </div>
     </div>
   `).join('');
 }
 
-function toggleExpand(id) {
-  document.getElementById('expanded-' + id).classList.toggle('show');
-}
-
-function render() {
-  renderFilters();
-  renderRecipes();
-}
-
-function escHtml(str) {
-  const d = document.createElement('div');
-  d.textContent = str;
-  return d.innerHTML;
-}
+function toggle(id) { document.getElementById('d'+id).classList.toggle('show'); }
+function render() { renderCatBar(); renderGrid(); }
 
 // Modal
-function openAddModal() {
-  editingId = null;
-  document.getElementById('modalTitle').textContent = 'Add Recipe';
-  clearForm();
-  document.getElementById('addModal').classList.add('show');
-  renderAllergenCheckboxes();
-}
+let selectedCat = '';
 
-function closeModal() {
-  document.getElementById('addModal').classList.remove('show');
-  editingId = null;
+function openModal() {
+  editingId = null; selectedCat = '';
+  document.getElementById('modalTitle').textContent = 'הוספת מתכון';
+  clearForm(); renderCatPicker();
+  document.getElementById('modal').classList.add('show');
 }
+function closeModal() { document.getElementById('modal').classList.remove('show'); }
 
-function switchTab(tab, btn) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+function switchTab(t, btn) {
+  document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
   btn.classList.add('active');
-  document.getElementById('tab-manual').style.display = tab === 'manual' ? '' : 'none';
-  document.getElementById('tab-url').style.display = tab === 'url' ? '' : 'none';
+  document.getElementById('tab-manual').style.display = t==='manual'?'':'none';
+  document.getElementById('tab-paste').style.display = t==='paste'?'':'none';
 }
 
-function renderAllergenCheckboxes(selected = []) {
-  document.getElementById('allergenCheckboxes').innerHTML = COMMON_ALLERGENS.map(a =>
-    `<label class="checkbox-label"><input type="checkbox" value="${a}" ${selected.includes(a) ? 'checked' : ''}> ${a}</label>`
+function renderCatPicker() {
+  document.getElementById('catPicker').innerHTML = CATEGORIES.map(c =>
+    `<span class="cat-option ${selectedCat===c?'active':''}" onclick="pickCat('${c}',this)">${c}</span>`
   ).join('');
+}
+function pickCat(c, el) {
+  selectedCat = selectedCat === c ? '' : c;
+  renderCatPicker();
 }
 
 function clearForm() {
-  document.getElementById('recipeName').value = '';
-  document.getElementById('recipeAge').value = '6+';
-  document.getElementById('recipeIngredients').value = '';
-  document.getElementById('recipeSteps').value = '';
-  document.getElementById('recipeNotes').value = '';
-  document.getElementById('importInput').value = '';
-  document.getElementById('importPreview').style.display = 'none';
-  renderAllergenCheckboxes();
+  ['fName','fIng','fSteps','fNotes','fPaste'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('preview').style.display = 'none';
+  selectedCat = '';
 }
 
-function getSelectedAllergens() {
-  return [...document.querySelectorAll('#allergenCheckboxes input:checked')].map(cb => cb.value);
-}
+function saveRecipe() {
+  const name = document.getElementById('fName').value.trim();
+  const ings = document.getElementById('fIng').value.trim();
+  const steps = document.getElementById('fSteps').value.trim();
+  const notes = document.getElementById('fNotes').value.trim();
+  if (!name || !ings || !steps) { alert('נא למלא שם, מצרכים והוראות הכנה'); return; }
 
-function saveManualRecipe() {
-  const name = document.getElementById('recipeName').value.trim();
-  const age = document.getElementById('recipeAge').value;
-  const ingredientsRaw = document.getElementById('recipeIngredients').value.trim();
-  const stepsRaw = document.getElementById('recipeSteps').value.trim();
-  const notes = document.getElementById('recipeNotes').value.trim();
-  const allergens = getSelectedAllergens();
-
-  if (!name || !ingredientsRaw || !stepsRaw) {
-    alert('Please fill in the recipe name, ingredients, and steps.');
-    return;
-  }
-
-  const ingredients = ingredientsRaw.split('\n').map(s => s.trim()).filter(Boolean);
-  const steps = stepsRaw.split('\n').map(s => s.trim()).filter(Boolean);
-
-  // Auto-detect allergens if none manually selected
-  let finalAllergens = allergens;
-  if (finalAllergens.length === 0) {
-    finalAllergens = detectAllergens(ingredients.join(' '));
-  }
+  const ingredients = ings.split('\n').map(s=>s.trim()).filter(Boolean);
+  const stepList = steps.split('\n').map(s=>s.trim()).filter(Boolean);
+  const allergens = detectAllergens(ingredients.join(' '));
 
   if (editingId) {
-    const idx = recipes.findIndex(r => r.id === editingId);
-    if (idx >= 0) {
-      recipes[idx] = { ...recipes[idx], name, age, ingredients, steps, allergens: finalAllergens, notes };
-    }
+    const i = recipes.findIndex(r=>r.id===editingId);
+    if (i>=0) recipes[i] = {...recipes[i], name, category:selectedCat, ingredients, steps:stepList, allergens, notes};
   } else {
-    recipes.push({
-      id: Date.now(),
-      name, age, ingredients, steps,
-      allergens: finalAllergens,
-      notes, source: '',
-      createdAt: new Date().toISOString()
-    });
+    recipes.push({ id:Date.now(), name, category:selectedCat, ingredients, steps:stepList, allergens, notes, source:'' });
   }
-
-  saveToStorage();
-  closeModal();
-  render();
+  save(); closeModal(); render();
 }
 
-function editRecipe(id) {
-  const r = recipes.find(x => x.id === id);
+function editR(id) {
+  const r = recipes.find(x=>x.id===id);
   if (!r) return;
   editingId = id;
-  document.getElementById('modalTitle').textContent = 'Edit Recipe';
-  document.getElementById('recipeName').value = r.name;
-  document.getElementById('recipeAge').value = r.age;
-  document.getElementById('recipeIngredients').value = r.ingredients.join('\n');
-  document.getElementById('recipeSteps').value = r.steps.join('\n');
-  document.getElementById('recipeNotes').value = r.notes || '';
-  renderAllergenCheckboxes(r.allergens);
+  document.getElementById('modalTitle').textContent = 'עריכת מתכון';
+  document.getElementById('fName').value = r.name;
+  document.getElementById('fIng').value = r.ingredients.join('\n');
+  document.getElementById('fSteps').value = r.steps.join('\n');
+  document.getElementById('fNotes').value = r.notes||'';
+  selectedCat = r.category||'';
+  renderCatPicker();
   document.querySelectorAll('.tab')[0].click();
-  document.getElementById('addModal').classList.add('show');
+  document.getElementById('modal').classList.add('show');
 }
 
-function deleteRecipe(id) {
-  if (!confirm('Delete this recipe?')) return;
-  recipes = recipes.filter(r => r.id !== id);
-  saveToStorage();
-  render();
+function delR(id) {
+  if (!confirm('למחוק את המתכון?')) return;
+  recipes = recipes.filter(r=>r.id!==id);
+  save(); render();
 }
 
-// URL / text import
+// Import: paste text or URL
 function analyzeImport() {
-  const input = document.getElementById('importInput').value.trim();
-  if (!input) { alert('Please paste a URL or recipe text.'); return; }
+  const input = document.getElementById('fPaste').value.trim();
+  if (!input) { alert('נא להדביק טקסט או קישור'); return; }
 
   const btn = document.getElementById('analyzeBtn');
-  btn.disabled = true;
-  btn.textContent = 'Analyzing...';
 
   if (/^https?:\/\//i.test(input)) {
-    fetchRecipeFromUrl(input);
+    btn.disabled = true; btn.textContent = 'טוען...';
+    fetchUrl(input).finally(() => { btn.disabled = false; btn.textContent = 'ניתוח וייבוא'; });
   } else {
-    parseRecipeText(input);
-    btn.disabled = false;
-    btn.textContent = 'Analyze & Import';
+    const result = parseText(input);
+    showPreview(result);
   }
 }
 
-async function fetchRecipeFromUrl(url) {
-  const btn = document.getElementById('analyzeBtn');
-  try {
-    const proxies = [
-      { prefix: 'https://api.allorigins.win/get?url=', json: true },
-      { prefix: 'https://api.allorigins.win/raw?url=', json: false },
-      { prefix: 'https://corsproxy.io/?', json: false },
-      { prefix: 'https://api.codetabs.com/v1/proxy?quest=', json: false }
-    ];
+async function fetchUrl(url) {
+  const proxies = [
+    { u: 'https://api.allorigins.win/get?url=', json: true },
+    { u: 'https://api.allorigins.win/raw?url=', json: false },
+    { u: 'https://api.codetabs.com/v1/proxy?quest=', json: false }
+  ];
 
-    let html = null;
-    for (const proxy of proxies) {
-      try {
-        const resp = await fetch(proxy.prefix + encodeURIComponent(url), {
-          signal: AbortSignal.timeout(12000),
-          headers: { 'Accept': 'text/html,application/json' }
-        });
-        if (resp.ok) {
-          let text = await resp.text();
-          if (proxy.json) {
-            try { text = JSON.parse(text).contents || text; } catch(e) {}
-          }
-          // Only accept if it looks like real HTML (not an error page)
-          if (text.length > 500 && (text.includes('<') || text.includes('ingredient') || text.includes('רכיבים'))) {
-            html = text;
-            break;
-          }
-        }
-      } catch(e) { continue; }
-    }
-
-    if (!html) {
-      alert('Could not fetch the URL. Please copy the recipe text from the website and paste it here instead.');
-      btn.disabled = false;
-      btn.textContent = 'Analyze & Import';
-      return;
-    }
-
-    const parsed = extractRecipeFromHtml(html, url);
-    if (parsed && parsed.ingredients.length > 0) {
-      showImportPreview(parsed);
-    } else {
-      alert('Could not find a clear recipe on that page. Please paste the recipe text directly.');
-    }
-  } catch(e) {
-    alert('Error fetching URL. Please paste the recipe text instead.');
-  }
-  btn.disabled = false;
-  btn.textContent = 'Analyze & Import';
-}
-
-function extractRecipeFromHtml(html, url) {
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(html, 'text/html');
-
-  // Try JSON-LD schema first (most recipe sites use this)
-  const scripts = doc.querySelectorAll('script[type="application/ld+json"]');
-  for (const script of scripts) {
+  let html = null;
+  for (const p of proxies) {
     try {
-      let data = JSON.parse(script.textContent);
-      if (Array.isArray(data)) data = data.find(x => x['@type'] === 'Recipe') || data[0];
-      if (data['@graph']) data = data['@graph'].find(x => x['@type'] === 'Recipe' || (Array.isArray(x['@type']) && x['@type'].includes('Recipe'))) || data;
+      const r = await fetch(p.u + encodeURIComponent(url), { signal: AbortSignal.timeout(12000) });
+      if (!r.ok) continue;
+      let t = await r.text();
+      if (p.json) { try { t = JSON.parse(t).contents || t; } catch(e){} }
+      if (t.length > 500) { html = t; break; }
+    } catch(e) { continue; }
+  }
 
-      if (data['@type'] === 'Recipe' || (Array.isArray(data['@type']) && data['@type'].includes('Recipe'))) {
-        const ingredients = Array.isArray(data.recipeIngredient) ? data.recipeIngredient : [];
+  if (!html) { alert('לא הצלחתי לגשת לאתר.\nנסו להעתיק את הטקסט מהאתר ולהדביק אותו כאן.'); return; }
+
+  const result = extractFromHtml(html, url);
+  if (result && result.ingredients.length > 0) {
+    showPreview(result);
+  } else {
+    alert('לא מצאתי מתכון בדף.\nנסו להעתיק את הטקסט מהאתר ולהדביק אותו כאן.');
+  }
+}
+
+function extractFromHtml(html, url) {
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+
+  // 1. JSON-LD
+  for (const s of doc.querySelectorAll('script[type="application/ld+json"]')) {
+    try {
+      let d = JSON.parse(s.textContent);
+      if (Array.isArray(d)) d = d.find(x => x['@type']==='Recipe') || d[0];
+      if (d['@graph']) d = d['@graph'].find(x => x['@type']==='Recipe') || d;
+      if (d['@type']==='Recipe' || (Array.isArray(d['@type']) && d['@type'].includes('Recipe'))) {
+        const ings = Array.isArray(d.recipeIngredient) ? d.recipeIngredient : [];
         let steps = [];
-        if (Array.isArray(data.recipeInstructions)) {
-          steps = data.recipeInstructions.map(s => typeof s === 'string' ? s : s.text || s.name || '').filter(Boolean);
-        } else if (typeof data.recipeInstructions === 'string') {
-          steps = data.recipeInstructions.split(/\.\s+/).filter(Boolean);
-        }
-
-        if (ingredients.length > 0) {
-          return {
-            name: data.name || 'Imported Recipe',
-            ingredients,
-            steps,
-            allergens: detectAllergens(ingredients.join(' ')),
-            notes: data.description || '',
-            source: url
-          };
-        }
+        if (Array.isArray(d.recipeInstructions)) steps = d.recipeInstructions.map(x => typeof x==='string'?x:x.text||x.name||'').filter(Boolean);
+        if (ings.length) return { name:d.name||'', ingredients:ings, steps, allergens:detectAllergens(ings.join(' ')), notes:d.description||'', source:url };
       }
-    } catch(e) {}
+    } catch(e){}
   }
 
-  // Try microdata (itemtype Recipe)
-  const recipeEl = doc.querySelector('[itemtype*="Recipe"]');
-  if (recipeEl) {
-    const name = recipeEl.querySelector('[itemprop="name"]')?.textContent?.trim() || '';
-    const ingEls = recipeEl.querySelectorAll('[itemprop="recipeIngredient"], [itemprop="ingredients"]');
-    const stepEls = recipeEl.querySelectorAll('[itemprop="recipeInstructions"] li, [itemprop="step"]');
-    if (ingEls.length > 0) {
-      const ingredients = [...ingEls].map(e => e.textContent.trim()).filter(Boolean);
-      const steps = stepEls.length > 0
-        ? [...stepEls].map(e => e.textContent.trim()).filter(Boolean)
-        : (recipeEl.querySelector('[itemprop="recipeInstructions"]')?.textContent?.trim() || '').split('\n').map(s => s.trim()).filter(Boolean);
-      return {
-        name: name || 'Imported Recipe', ingredients, steps,
-        allergens: detectAllergens(ingredients.join(' ')),
-        notes: '', source: url
-      };
-    }
+  // 2. Recipe plugin classes
+  const ingEls = doc.querySelectorAll('.wprm-recipe-ingredient, .tasty-recipe-ingredients li, .recipe-ingredients li, .ingredient');
+  if (ingEls.length) {
+    const name = (doc.querySelector('.wprm-recipe-name, .tasty-recipes-title, h1, h2') || {}).textContent?.trim() || '';
+    const stepEls = doc.querySelectorAll('.wprm-recipe-instruction, .tasty-recipe-instructions li, .recipe-instructions li, .step');
+    const ings = [...ingEls].map(e=>e.textContent.trim()).filter(Boolean);
+    const steps = [...stepEls].map(e=>e.textContent.trim()).filter(Boolean);
+    return { name, ingredients:ings, steps, allergens:detectAllergens(ings.join(' ')), notes:'', source:url };
   }
 
-  // Try common recipe plugin CSS classes (WPRM, Tasty, etc.)
-  const wprmIngredients = doc.querySelectorAll('.wprm-recipe-ingredient, .tasty-recipe-ingredients li, .recipe-ingredients li, .ingredient');
-  const wprmSteps = doc.querySelectorAll('.wprm-recipe-instruction, .tasty-recipe-instructions li, .recipe-instructions li, .direction, .step');
-  if (wprmIngredients.length > 0) {
-    const name = (doc.querySelector('.wprm-recipe-name, .tasty-recipes-title, .recipe-title, h2.recipe-name') || doc.querySelector('h1'))?.textContent?.trim() || '';
-    const ingredients = [...wprmIngredients].map(e => e.textContent.trim()).filter(Boolean);
-    const steps = [...wprmSteps].map(e => e.textContent.trim()).filter(Boolean);
-    return {
-      name: name || 'Imported Recipe', ingredients, steps,
-      allergens: detectAllergens(ingredients.join(' ')),
-      notes: '', source: url
-    };
-  }
-
-  // Fallback: strip scripts/styles, then extract clean text
-  doc.querySelectorAll('script, style, noscript, nav, footer, header, iframe, svg, form, [role="navigation"], [role="banner"]').forEach(el => el.remove());
-  const body = doc.body?.textContent || '';
-  // Filter out lines that look like CSS/JS
-  const cleanText = body.split('\n')
-    .map(s => s.trim())
-    .filter(s => s.length > 0 && s.length < 300)
-    .filter(s => !s.match(/^[\{\};\(\)]/) && !s.includes('{') && !s.includes('}') && !s.includes('function(') && !s.includes('var ') && !s.includes('const ') && !s.includes('/*') && !s.includes('*/') && !s.includes('img.') && !s.includes('display:') && !s.includes('border:'))
+  // 3. Clean text fallback - remove all junk first
+  doc.querySelectorAll('script,style,noscript,nav,footer,header,iframe,svg,form,aside,meta,link').forEach(e=>e.remove());
+  const text = (doc.body?.innerText || doc.body?.textContent || '')
+    .split('\n').map(s=>s.trim())
+    .filter(s => s.length > 1 && s.length < 250)
+    .filter(s => !/[{}<>]|function|var |const |display:|opacity:|background|font-size|margin|padding|border|@media|@import|sourceURL|\.wp-|\.e-con|important;/.test(s))
     .join('\n');
 
-  if (cleanText.length > 50) {
-    return parseRecipeText(cleanText, url, true);
-  }
+  if (text.length > 30) return parseText(text, url);
   return null;
 }
 
-function parseRecipeText(text, source = '', returnOnly = false) {
-  const lines = text.split('\n').map(s => s.trim()).filter(s => s.length > 0 && s.length < 200);
-  let name = '';
-  let ingredients = [];
-  let steps = [];
-  let section = 'unknown';
+function parseText(text, source = '') {
+  const lines = text.split('\n').map(s=>s.trim()).filter(s => s.length > 1 && s.length < 250);
+  // Extra filter: remove anything that looks like code/CSS
+  const clean = lines.filter(s => !/[{}<>]|function|var |const |display:|opacity:|background-|font-|sourceURL|\.wp-|important;|#[0-9a-f]{6}/i.test(s));
 
-  // Hebrew keywords for section detection
-  const ingKeywords = /^(ingredient|what you.?ll need|רכיבים|חומרים|מצרכים|מה צריך)/i;
-  const stepKeywords = /^(step|instruction|direction|method|preparation|how to make|אופן הכנה|הוראות הכנה|הכנה|שלבי הכנה|אופן ההכנה)/i;
+  let name = '', ingredients = [], steps = [], section = 'unknown';
 
-  for (const line of lines) {
-    // Skip very short junk lines or lines that look like metadata
-    if (line.length < 2) continue;
-    if (line.match(/^(share|print|save|skip|jump|copyright|©|\d+\s*(comment|review|rating|calorie|minute|serving))/i)) continue;
+  const ingHead = /^(ingredients?|רכיבים|חומרים|מצרכים|מה צריך)/i;
+  const stepHead = /^(steps?|instructions?|directions?|method|preparation|אופן הכנה|הוראות הכנה|הכנה|אופן ההכנה)/i;
 
-    // Detect title
-    if (!name && line.length < 100 && !line.match(ingKeywords) && !line.match(stepKeywords)) {
-      name = line.replace(/^#+\s*/, '');
+  for (const line of clean) {
+    if (!name && line.length < 100 && !ingHead.test(line) && !stepHead.test(line)) {
+      name = line.replace(/^#+\s*/, '').replace(/\s*[-|]\s*.*$/, ''); // strip "- sitename" from title
       continue;
     }
+    if (ingHead.test(line)) { section = 'ingredients'; continue; }
+    if (stepHead.test(line)) { section = 'steps'; continue; }
 
-    // Section headers
-    if (ingKeywords.test(line)) { section = 'ingredients'; continue; }
-    if (stepKeywords.test(line)) { section = 'steps'; continue; }
-
-    // Auto-detect section from content patterns
     if (section === 'unknown') {
-      if (line.match(/^\d+[\.\)]\s/) || line.match(/^(first|then|next|finally|לחמם|לערבב|לטחון|לשים|לאפות|להוסיף|לבשל)/i)) {
-        section = 'steps';
-      } else if (line.match(/^[\-\*]\s/) || line.match(/^\d+\s*(tbsp|tsp|cup|cups|g|kg|ml|oz|כפ|כוס|חצי|רבע)/i) || line.match(/^(כף|כפית|חצי|רבע|כוס|\d)/)) {
-        section = 'ingredients';
-      }
+      if (/^\d+[\.\)]\s|^(first|then|next|לחמם|לערבב|לטחון|לשים|לאפות|להוסיף|לבשל|לצנן|למעוך|לטרוף|ליצוק|לוודא)/i.test(line)) section = 'steps';
+      else if (/^[\-\*]\s|^\d+\s*(tbsp|tsp|cup|g|ml|כפ|כוס)|^(כף|כפית|חצי|רבע|כוס|\d)/i.test(line)) section = 'ingredients';
     }
 
     const cleaned = line.replace(/^[\-\*\d\.\)]+\s*/, '');
-    if (!cleaned || cleaned.length < 2) continue;
+    if (!cleaned) continue;
 
-    if (section === 'ingredients' && cleaned.length < 120) {
-      ingredients.push(cleaned);
-    } else if (section === 'steps') {
-      steps.push(cleaned);
-    } else if (cleaned.length < 80) {
-      // Ambiguous - store for now, will assign later
-      ingredients.push(cleaned);
-    }
+    if (section === 'ingredients') ingredients.push(cleaned);
+    else if (section === 'steps') steps.push(cleaned);
+    else if (cleaned.length < 80) ingredients.push(cleaned);
   }
 
-  if (ingredients.length === 0 && steps.length === 0) {
-    const useful = lines.filter(l => l.length > 3 && l.length < 200);
-    const midpoint = Math.floor(useful.length / 2);
-    ingredients = useful.slice(0, midpoint).map(l => l.replace(/^[\-\*\d\.\)]+\s*/, ''));
-    steps = useful.slice(midpoint).map(l => l.replace(/^[\-\*\d\.\)]+\s*/, ''));
-  }
-
-  const result = {
-    name: name || 'Imported Recipe',
-    ingredients: ingredients.slice(0, 30),
-    steps: steps.slice(0, 20),
+  return {
+    name: name || 'מתכון מיובא',
+    ingredients: ingredients.slice(0,30),
+    steps: steps.slice(0,25),
     allergens: detectAllergens(ingredients.join(' ')),
-    notes: '',
-    source: source
+    notes: '', source
   };
-
-  if (returnOnly) return result;
-  showImportPreview(result);
-  return result;
 }
 
-function showImportPreview(data) {
-  const preview = document.getElementById('importPreview');
-  preview.style.display = '';
-  preview.innerHTML = `
-    <div style="background:#f0faf8; border-radius:10px; padding:1rem; border:1px solid #c8e6e0;">
-      <h3 style="margin-bottom:0.5rem">Preview: ${escHtml(data.name)}</h3>
-      <p style="font-size:0.85rem"><strong>Ingredients (${data.ingredients.length}):</strong> ${data.ingredients.slice(0,5).map(escHtml).join(', ')}${data.ingredients.length > 5 ? '...' : ''}</p>
-      <p style="font-size:0.85rem"><strong>Steps:</strong> ${data.steps.length}</p>
-      ${data.allergens.length > 0 ? `<p style="font-size:0.85rem; color:var(--allergen)"><strong>&#9888; Detected allergens:</strong> ${data.allergens.join(', ')}</p>` : '<p style="font-size:0.85rem; color:var(--secondary)">No common allergens detected</p>'}
-      <div style="display:flex; gap:0.5rem; margin-top:0.8rem;">
-        <button class="btn btn-primary btn-sm" onclick="confirmImport()">Add This Recipe</button>
-        <button class="btn btn-outline btn-sm" onclick="editImported()">Edit First</button>
+function showPreview(data) {
+  const p = document.getElementById('preview');
+  p.style.display = '';
+  p._data = data;
+  p.innerHTML = `
+    <div style="background:#f0faf8;border-radius:10px;padding:0.8rem;border:1px solid #c8e6e0">
+      <strong>${esc(data.name)}</strong><br>
+      <span style="font-size:0.82rem">מצרכים (${data.ingredients.length}): ${data.ingredients.slice(0,5).map(esc).join(', ')}${data.ingredients.length>5?'...':''}</span><br>
+      <span style="font-size:0.82rem">שלבים: ${data.steps.length}</span>
+      ${data.allergens.length ? `<br><span style="font-size:0.82rem;color:var(--allergen)">אלרגנים: ${data.allergens.join(', ')}</span>` : ''}
+      <div style="display:flex;gap:0.4rem;margin-top:0.6rem">
+        <button class="btn btn-primary btn-sm" onclick="confirmImport()">הוספה</button>
+        <button class="btn btn-outline btn-sm" onclick="editImported()">עריכה לפני הוספה</button>
       </div>
-    </div>
-  `;
-  preview._data = data;
+    </div>`;
 }
 
 function confirmImport() {
-  const data = document.getElementById('importPreview')._data;
-  if (!data) return;
-  recipes.push({
-    id: Date.now(),
-    name: data.name, age: '6+',
-    ingredients: data.ingredients, steps: data.steps,
-    allergens: data.allergens, notes: data.notes,
-    source: data.source,
-    createdAt: new Date().toISOString()
-  });
-  saveToStorage();
-  closeModal();
-  render();
+  const d = document.getElementById('preview')._data;
+  if (!d) return;
+  recipes.push({ id:Date.now(), name:d.name, category:guessCategory(d.name), ingredients:d.ingredients, steps:d.steps, allergens:d.allergens, notes:d.notes, source:d.source });
+  save(); closeModal(); render();
 }
 
 function editImported() {
-  const data = document.getElementById('importPreview')._data;
-  if (!data) return;
-  document.getElementById('recipeName').value = data.name;
-  document.getElementById('recipeIngredients').value = data.ingredients.join('\n');
-  document.getElementById('recipeSteps').value = data.steps.join('\n');
-  document.getElementById('recipeNotes').value = data.notes || '';
-  renderAllergenCheckboxes(data.allergens);
+  const d = document.getElementById('preview')._data;
+  if (!d) return;
+  document.getElementById('fName').value = d.name;
+  document.getElementById('fIng').value = d.ingredients.join('\n');
+  document.getElementById('fSteps').value = d.steps.join('\n');
+  document.getElementById('fNotes').value = d.notes||'';
+  selectedCat = guessCategory(d.name);
+  renderCatPicker();
   document.querySelectorAll('.tab')[0].click();
 }
 
-// Export / Import (for sharing between devices)
-function exportRecipes() {
-  const blob = new Blob([JSON.stringify(recipes, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'baby-recipes.json';
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-function importRecipes(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    try {
-      const imported = JSON.parse(e.target.result);
-      if (!Array.isArray(imported)) { alert('Invalid file format.'); return; }
-      const existingNames = new Set(recipes.map(r => r.name.toLowerCase()));
-      let added = 0;
-      for (const r of imported) {
-        if (!existingNames.has(r.name.toLowerCase())) {
-          recipes.push({ ...r, id: Date.now() + added });
-          added++;
-        }
-      }
-      saveToStorage();
-      render();
-      alert(`Imported ${added} new recipes (${imported.length - added} duplicates skipped).`);
-    } catch(e) {
-      alert('Could not read the file. Make sure it is a valid JSON export.');
-    }
+function guessCategory(name) {
+  const n = name.toLowerCase();
+  const map = {
+    'מאפינס': ['מאפינ','muffin'],
+    'פנקייק': ['פנקייק','pancake','לביבה','לביבות'],
+    'מרק': ['מרק','soup'],
+    'פיורה': ['פיורה','puree','מחית','מעוך'],
+    'פסטה': ['פסטה','pasta','נודלס','אטריות'],
+    'אורז': ['אורז','rice','ריזוטו'],
+    'דגים': ['דג','סלמון','טונה','fish','salmon'],
+    'בשר': ['בשר','עוף','הודו','כבד','meat','chicken'],
+    'חטיפים': ['חטיף','ביס','snack','balls','כדור'],
+    'קינוח': ['עוגה','עוגיה','קינוח','dessert','cake','cookie']
   };
-  reader.readAsText(file);
-  event.target.value = '';
+  for (const [cat, kws] of Object.entries(map)) {
+    if (kws.some(kw => n.includes(kw))) return cat;
+  }
+  return '';
 }
 
-// Search
-let searchTimeout;
-document.getElementById('searchBox').addEventListener('input', () => {
-  clearTimeout(searchTimeout);
-  searchTimeout = setTimeout(render, 200);
-});
+// Export/Import
+function exportAll() {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(recipes,null,2)],{type:'application/json'}));
+  a.download = 'baby-recipes.json'; a.click();
+}
+function importAll(e) {
+  const f = e.target.files[0]; if (!f) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    try {
+      const imp = JSON.parse(ev.target.result);
+      if (!Array.isArray(imp)) { alert('קובץ לא תקין'); return; }
+      const existing = new Set(recipes.map(r=>r.name.toLowerCase()));
+      let n = 0;
+      for (const r of imp) { if (!existing.has(r.name.toLowerCase())) { recipes.push({...r,id:Date.now()+n}); n++; } }
+      save(); render();
+      alert(`יובאו ${n} מתכונים חדשים`);
+    } catch(e) { alert('שגיאה בקריאת הקובץ'); }
+  };
+  reader.readAsText(f); e.target.value='';
+}
 
-// Close modal on overlay click
-document.getElementById('addModal').addEventListener('click', function(e) {
-  if (e.target === this) closeModal();
-});
+// Events
+let st;
+document.getElementById('searchBox').addEventListener('input', () => { clearTimeout(st); st=setTimeout(render,200); });
+document.getElementById('modal').addEventListener('click', function(e) { if (e.target===this) closeModal(); });
+document.addEventListener('keydown', e => { if (e.key==='Escape') closeModal(); });
 
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') closeModal();
-});
-
-// Initial render
 render();
 </script>
 </body>
