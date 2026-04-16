@@ -38,14 +38,17 @@
   .btn-sm { padding:0.3rem 0.65rem; font-size:0.78rem; }
 
   /* Category filter */
-  .cat-bar { display:flex; flex-wrap:wrap; gap:0.35rem; margin-bottom:1rem; }
-  .cat-chip {
-    padding:0.3rem 0.7rem; border-radius:15px; font-size:0.8rem;
+  .filters { margin-bottom:1rem; }
+  .filter-row { display:flex; flex-wrap:wrap; gap:0.35rem; align-items:center; margin-bottom:0.5rem; }
+  .filter-label { font-size:0.75rem; color:var(--text-light); text-transform:uppercase; letter-spacing:0.03em; font-weight:600; margin-right:0.3rem; min-width:50px; }
+  .f-chip {
+    padding:0.25rem 0.6rem; border-radius:15px; font-size:0.78rem;
     cursor:pointer; border:1.5px solid var(--border); background:#fff;
     user-select:none; transition:all 0.15s;
   }
-  .cat-chip:hover { border-color:var(--secondary); }
-  .cat-chip.active { background:var(--secondary); color:#fff; border-color:var(--secondary); }
+  .f-chip:hover { border-color:var(--secondary); }
+  .f-chip.active { background:var(--secondary); color:#fff; border-color:var(--secondary); }
+  .f-chip.time-chip.active { background:var(--primary); border-color:var(--primary); }
 
   /* Cards */
   .recipe-grid { display:grid; gap:0.8rem; }
@@ -140,7 +143,7 @@
     <button class="btn btn-primary" onclick="openModal()">+ Add Recipe</button>
     <button class="btn btn-outline" id="shopToggle" onclick="toggleShopMode()">Shopping List</button>
   </div>
-  <div class="cat-bar" id="catBar"></div>
+  <div class="filters" id="filters"></div>
   <div class="recipe-grid" id="grid"></div>
   <div class="data-bar">
     <button class="btn btn-outline btn-sm" onclick="exportAll()">Export</button>
@@ -237,7 +240,6 @@ const GIST_API = `https://api.github.com/gists/${GIST_ID}`;
 
 let recipes = [];
 let editingId = null;
-let activeCat = '';
 let saving = false;
 
 const DEFAULT_RECIPES = [
@@ -329,6 +331,32 @@ function isAllergenIng(ing) {
   return false;
 }
 
+// Minor ingredients to exclude from filter chips
+const MINOR_INGS = new Set(['salt','pepper','water','oil','olive oil','sugar','pinch','cinnamon','vanilla',
+  'מלח','פלפל','מים','שמן','שמן זית','סוכר','קינמון','וניל','קורט','מעט','שמן קנולה','שמן לטיגון',
+  'pinch of cinnamon','pinch of salt','squeeze of lemon juice','lemon juice','garlic','שום']);
+
+function getMainIngredients() {
+  const counts = {};
+  recipes.forEach(r => {
+    const seen = new Set();
+    r.ingredients.forEach(raw => {
+      // Extract just the ingredient name (strip qty/unit)
+      const name = raw.replace(/^[\d\/\.½¼¾⅓⅔\s\-]+/, '')
+        .replace(/^(tbsp|tsp|cup|cups|g|kg|ml|l|oz|lb|כפ(?:ות|ית)?|כף|כוס(?:ות)?|גרם|קילו|מ"ל|ליטר)\s*/i, '')
+        .trim().toLowerCase();
+      if (name.length < 2 || MINOR_INGS.has(name)) return;
+      // Use first 2 words max as key
+      const short = name.split(/\s+/).slice(0, 2).join(' ');
+      if (!seen.has(short)) { seen.add(short); counts[short] = (counts[short]||0) + 1; }
+    });
+  });
+  // Only show ingredients that appear in 2+ recipes, or top 12 if not enough
+  let ings = Object.entries(counts).filter(([,c]) => c >= 2).map(([n]) => n).sort();
+  if (ings.length < 3) ings = Object.entries(counts).sort((a,b) => b[1]-a[1]).slice(0, 12).map(([n]) => n).sort();
+  return ings;
+}
+
 function getAllCats() {
   const s = new Set();
   recipes.forEach(r => { if (r.category) s.add(r.category); });
@@ -337,19 +365,71 @@ function getAllCats() {
 
 function esc(str) { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
 
-function renderCatBar() {
+let activeCat = '';
+let activeTime = 0; // 0 = any
+let activeIngs = new Set();
+
+const TIME_OPTIONS = [
+  { label: '15 min', max: 15 },
+  { label: '30 min', max: 30 },
+  { label: '45 min', max: 45 },
+  { label: '60+ min', max: 9999 }
+];
+
+function renderFilters() {
   const cats = getAllCats();
-  document.getElementById('catBar').innerHTML = cats.length === 0 ? '' :
-    cats.map(c => `<span class="cat-chip ${activeCat===c?'active':''}" onclick="toggleCat('${esc(c)}')">${esc(c)}</span>`).join('');
+  const ings = getMainIngredients();
+  const hasTime = recipes.some(r => r.prepTime);
+
+  let html = '';
+
+  // Time filter
+  if (hasTime) {
+    html += `<div class="filter-row"><span class="filter-label">Time</span>`;
+    html += TIME_OPTIONS.map(t =>
+      `<span class="f-chip time-chip ${activeTime===t.max?'active':''}" onclick="toggleTime(${t.max})">${t.label}</span>`
+    ).join('');
+    html += `</div>`;
+  }
+
+  // Category filter
+  if (cats.length > 0) {
+    html += `<div class="filter-row"><span class="filter-label">Type</span>`;
+    html += cats.map(c =>
+      `<span class="f-chip ${activeCat===c?'active':''}" onclick="toggleCat('${esc(c)}')">${esc(c)}</span>`
+    ).join('');
+    html += `</div>`;
+  }
+
+  // Ingredient filter
+  if (ings.length > 0) {
+    html += `<div class="filter-row"><span class="filter-label">With</span>`;
+    html += ings.map(i =>
+      `<span class="f-chip ${activeIngs.has(i)?'active':''}" onclick="toggleIng('${esc(i)}')">${esc(i)}</span>`
+    ).join('');
+    html += `</div>`;
+  }
+
+  document.getElementById('filters').innerHTML = html;
 }
 
 function toggleCat(c) { activeCat = activeCat === c ? '' : c; render(); }
+function toggleTime(t) { activeTime = activeTime === t ? 0 : t; render(); }
+function toggleIng(i) { activeIngs.has(i) ? activeIngs.delete(i) : activeIngs.add(i); render(); }
 
 function filtered() {
   const q = document.getElementById('searchBox').value.toLowerCase().trim();
   return recipes.filter(r => {
     if (q && !(r.name+' '+r.ingredients.join(' ')+(r.notes||'')).toLowerCase().includes(q)) return false;
     if (activeCat && r.category !== activeCat) return false;
+    if (activeTime) {
+      if (activeTime === 9999) { if ((r.prepTime||0) < 60) return false; }
+      else { if (!r.prepTime || r.prepTime > activeTime) return false; }
+    }
+    if (activeIngs.size > 0) {
+      const rIngs = r.ingredients.join(' ').toLowerCase();
+      for (const ing of activeIngs) { if (!rIngs.includes(ing)) return false; }
+    }
     return true;
   });
 }
@@ -391,7 +471,7 @@ function renderGrid() {
 }
 
 function toggle(id) { document.getElementById('d'+id).classList.toggle('show'); }
-function render() { renderCatBar(); renderGrid(); }
+function render() { renderFilters(); renderGrid(); }
 
 // Modal
 let selectedCat = '';
