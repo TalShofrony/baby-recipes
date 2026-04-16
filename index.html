@@ -165,6 +165,10 @@
           <textarea id="fSteps" placeholder="One per line:&#10;Preheat oven to 180C&#10;Mix all ingredients&#10;Bake for 25 minutes"></textarea>
         </div>
         <div class="field">
+          <label>Source (optional)</label>
+          <input type="text" id="fSource" placeholder="URL or person name, e.g. Grandma / https://...">
+        </div>
+        <div class="field">
           <label>Notes (optional)</label>
           <textarea id="fNotes" placeholder="Tips, variations, storage..." style="min-height:50px"></textarea>
         </div>
@@ -346,7 +350,7 @@ function renderGrid() {
         <ol>${r.steps.map(s => `<li>${esc(s)}</li>`).join('')}</ol>
         ${r.allergens.length ? `<div class="allergen-note">Allergens: ${r.allergens.join(', ')}</div>` : ''}
         ${r.notes ? `<p style="margin-top:0.4rem;font-size:0.82rem;color:var(--text-light)">${esc(r.notes)}</p>` : ''}
-        ${r.source ? `<a href="${esc(r.source)}" target="_blank" rel="noopener" class="source-link">Original recipe</a>` : ''}
+        ${r.source ? (r.source.match(/^https?:\/\//) ? `<a href="${esc(r.source)}" target="_blank" rel="noopener" class="source-link">Source: ${esc(r.source.replace(/^https?:\/\/(www\.)?/,'').split('/')[0])}</a>` : `<span class="source-link">From: ${esc(r.source)}</span>`) : ''}
         <div class="card-actions">
           ${hasHebrew(r.name+r.ingredients.join('')) ? `<button class="btn btn-secondary btn-sm" onclick="translateR(${r.id});event.stopPropagation()">Translate</button>` : ''}
           <button class="btn btn-outline btn-sm" onclick="editR(${r.id});event.stopPropagation()">Edit</button>
@@ -389,7 +393,7 @@ function pickCat(c, el) {
 }
 
 function clearForm() {
-  ['fName','fIng','fSteps','fNotes','fPaste','fPrep'].forEach(id => document.getElementById(id).value = '');
+  ['fName','fIng','fSteps','fNotes','fPaste','fPrep','fSource'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('preview').style.display = 'none';
   selectedCat = '';
 }
@@ -400,6 +404,7 @@ function saveRecipe() {
   const steps = document.getElementById('fSteps').value.trim();
   const notes = document.getElementById('fNotes').value.trim();
   const prepTime = parseInt(document.getElementById('fPrep').value) || 0;
+  const source = document.getElementById('fSource').value.trim();
   if (!name || !ings || !steps) { alert('Please fill in name, ingredients, and steps'); return; }
 
   const ingredients = ings.split('\n').map(s=>s.trim()).filter(Boolean);
@@ -408,9 +413,9 @@ function saveRecipe() {
 
   if (editingId) {
     const i = recipes.findIndex(r=>r.id===editingId);
-    if (i>=0) recipes[i] = {...recipes[i], name, category:selectedCat, ingredients, steps:stepList, allergens, notes, prepTime};
+    if (i>=0) recipes[i] = {...recipes[i], name, category:selectedCat, ingredients, steps:stepList, allergens, notes, prepTime, source};
   } else {
-    recipes.push({ id:Date.now(), name, category:selectedCat, ingredients, steps:stepList, allergens, notes, prepTime, source:'' });
+    recipes.push({ id:Date.now(), name, category:selectedCat, ingredients, steps:stepList, allergens, notes, prepTime, source });
   }
   save(); closeModal(); render();
 }
@@ -425,6 +430,7 @@ function editR(id) {
   document.getElementById('fSteps').value = r.steps.join('\n');
   document.getElementById('fNotes').value = r.notes||'';
   document.getElementById('fPrep').value = r.prepTime||'';
+  document.getElementById('fSource').value = r.source||'';
   selectedCat = r.category||'';
   renderCatPicker();
   document.querySelectorAll('.tab')[0].click();
