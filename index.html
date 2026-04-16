@@ -190,35 +190,77 @@ const ALLERGEN_KEYWORDS = {
   'Sesame': ['sesame','tahini','שומשום','טחינה']
 };
 
-let recipes = JSON.parse(localStorage.getItem('babyRecipes2') || '[]');
+const BLOB_ID = '019d9549-d0fd-7e20-a2ef-9f3c2ae0648e';
+const BLOB_URL = `https://jsonblob.com/api/jsonBlob/${BLOB_ID}`;
+
+let recipes = [];
 let editingId = null;
 let activeCat = '';
+let saving = false;
 
-if (recipes.length === 0) {
-  recipes = [
-    {
-      id: 1, name: "Sweet Potato Puree", category: "Puree",
-      ingredients: ["2 medium sweet potatoes","1 tbsp olive oil","Pinch of cinnamon"],
-      steps: ["Peel and dice the sweet potatoes","Steam for 15 minutes until soft","Blend with olive oil until smooth","Add a pinch of cinnamon and mix","Let cool before serving"],
-      allergens: [], notes: "Can be frozen in ice cube trays for easy portions", source: ""
-    },
-    {
-      id: 2, name: "Banana Oat Pancakes", category: "Pancakes",
-      ingredients: ["1 ripe banana","1 egg","3 tbsp oat flour","1 tsp butter for cooking"],
-      steps: ["Mash the banana","Beat in the egg and mix","Add oat flour","Heat butter in a pan on low-medium","Drop small spoonfuls and cook 2 min per side","Cool and cut into strips"],
-      allergens: ["Eggs","Dairy"], notes: "Perfect for self-feeding!", source: ""
-    },
-    {
-      id: 3, name: "Avocado Salmon Mash", category: "Fish",
-      ingredients: ["1/2 ripe avocado","50g cooked salmon","Squeeze of lemon juice"],
-      steps: ["Make sure salmon is fully cooked and flake with a fork","Mash the avocado","Combine together","Add a squeeze of lemon juice"],
-      allergens: ["Fish"], notes: "Great source of omega-3", source: ""
+const DEFAULT_RECIPES = [
+  {
+    id: 1, name: "Sweet Potato Puree", category: "Puree",
+    ingredients: ["2 medium sweet potatoes","1 tbsp olive oil","Pinch of cinnamon"],
+    steps: ["Peel and dice the sweet potatoes","Steam for 15 minutes until soft","Blend with olive oil until smooth","Add a pinch of cinnamon and mix","Let cool before serving"],
+    allergens: [], notes: "Can be frozen in ice cube trays for easy portions", source: ""
+  },
+  {
+    id: 2, name: "Banana Oat Pancakes", category: "Pancakes",
+    ingredients: ["1 ripe banana","1 egg","3 tbsp oat flour","1 tsp butter for cooking"],
+    steps: ["Mash the banana","Beat in the egg and mix","Add oat flour","Heat butter in a pan on low-medium","Drop small spoonfuls and cook 2 min per side","Cool and cut into strips"],
+    allergens: ["Eggs","Dairy"], notes: "Perfect for self-feeding!", source: ""
+  },
+  {
+    id: 3, name: "Avocado Salmon Mash", category: "Fish",
+    ingredients: ["1/2 ripe avocado","50g cooked salmon","Squeeze of lemon juice"],
+    steps: ["Make sure salmon is fully cooked and flake with a fork","Mash the avocado","Combine together","Add a squeeze of lemon juice"],
+    allergens: ["Fish"], notes: "Great source of omega-3", source: ""
+  }
+];
+
+async function loadRecipes() {
+  try {
+    const r = await fetch(BLOB_URL, { headers: { 'Accept': 'application/json' } });
+    if (r.ok) {
+      const data = await r.json();
+      recipes = Array.isArray(data.recipes) ? data.recipes : (Array.isArray(data) ? data : []);
     }
-  ];
+  } catch(e) {
+    console.warn('Cloud load failed, using local cache');
+  }
+  // Fallback to localStorage cache
+  if (!recipes.length) {
+    recipes = JSON.parse(localStorage.getItem('babyRecipes3') || 'null') || DEFAULT_RECIPES;
+  }
+  // Also merge any recipes from localStorage that aren't in cloud (one-time migration)
+  const oldLocal = JSON.parse(localStorage.getItem('babyRecipes2') || '[]');
+  if (oldLocal.length) {
+    const cloudIds = new Set(recipes.map(r => r.name.toLowerCase()));
+    for (const r of oldLocal) {
+      if (!cloudIds.has(r.name.toLowerCase())) { recipes.push({...r, id: Date.now() + Math.random()*1000|0}); }
+    }
+    localStorage.removeItem('babyRecipes2');
+  }
   save();
+  render();
 }
 
-function save() { localStorage.setItem('babyRecipes2', JSON.stringify(recipes)); }
+async function save() {
+  // Always save locally as cache
+  localStorage.setItem('babyRecipes3', JSON.stringify(recipes));
+  // Save to cloud
+  if (saving) return;
+  saving = true;
+  try {
+    await fetch(BLOB_URL, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({ recipes })
+    });
+  } catch(e) { console.warn('Cloud save failed, saved locally'); }
+  saving = false;
+}
 
 function detectAllergens(text) {
   const lower = text.toLowerCase();
@@ -650,7 +692,7 @@ document.getElementById('searchBox').addEventListener('input', () => { clearTime
 document.getElementById('modal').addEventListener('click', function(e) { if (e.target===this) closeModal(); });
 document.addEventListener('keydown', e => { if (e.key==='Escape') closeModal(); });
 
-render();
+loadRecipes();
 </script>
 </body>
 </html>
