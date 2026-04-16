@@ -58,6 +58,8 @@
   .card-top { padding:0.8rem 1rem; display:flex; justify-content:space-between; align-items:flex-start; gap:0.5rem; }
   .card-top h2 { font-size:1.05rem; font-weight:600; }
   .card-cat { font-size:0.72rem; background:var(--secondary); color:#fff; padding:0.15rem 0.5rem; border-radius:8px; white-space:nowrap; flex-shrink:0; }
+  .card-prep { font-size:0.72rem; background:#eee; color:var(--text-light); padding:0.15rem 0.5rem; border-radius:8px; white-space:nowrap; flex-shrink:0; }
+  .card-tags { display:flex; gap:0.3rem; flex-shrink:0; }
 
   .card-chips { padding:0 1rem 0.7rem; display:flex; flex-wrap:wrap; gap:0.3rem; }
   .chip { font-size:0.75rem; padding:0.15rem 0.45rem; border-radius:8px; background:#f0f0f0; unicode-bidi:plaintext; }
@@ -144,9 +146,15 @@
           <label>Recipe Name *</label>
           <input type="text" id="fName" placeholder="e.g. Banana Muffins">
         </div>
-        <div class="field">
-          <label>Category</label>
-          <div class="cat-select" id="catPicker"></div>
+        <div class="field" style="display:flex;gap:0.6rem">
+          <div style="flex:1">
+            <label>Category</label>
+            <div class="cat-select" id="catPicker"></div>
+          </div>
+          <div style="width:100px">
+            <label>Prep (min)</label>
+            <input type="number" id="fPrep" min="1" max="999" placeholder="e.g. 25">
+          </div>
         </div>
         <div class="field">
           <label>Ingredients *</label>
@@ -205,19 +213,19 @@ const DEFAULT_RECIPES = [
     id: 1, name: "Sweet Potato Puree", category: "Puree",
     ingredients: ["2 medium sweet potatoes","1 tbsp olive oil","Pinch of cinnamon"],
     steps: ["Peel and dice the sweet potatoes","Steam for 15 minutes until soft","Blend with olive oil until smooth","Add a pinch of cinnamon and mix","Let cool before serving"],
-    allergens: [], notes: "Can be frozen in ice cube trays for easy portions", source: ""
+    allergens: [], notes: "Can be frozen in ice cube trays for easy portions", prepTime: 20, source: ""
   },
   {
     id: 2, name: "Banana Oat Pancakes", category: "Pancakes",
     ingredients: ["1 ripe banana","1 egg","3 tbsp oat flour","1 tsp butter for cooking"],
     steps: ["Mash the banana","Beat in the egg and mix","Add oat flour","Heat butter in a pan on low-medium","Drop small spoonfuls and cook 2 min per side","Cool and cut into strips"],
-    allergens: ["Eggs","Dairy"], notes: "Perfect for self-feeding!", source: ""
+    allergens: ["Eggs","Dairy"], notes: "Perfect for self-feeding!", prepTime: 15, source: ""
   },
   {
     id: 3, name: "Avocado Salmon Mash", category: "Fish",
     ingredients: ["1/2 ripe avocado","50g cooked salmon","Squeeze of lemon juice"],
     steps: ["Make sure salmon is fully cooked and flake with a fork","Mash the avocado","Combine together","Add a squeeze of lemon juice"],
-    allergens: ["Fish"], notes: "Great source of omega-3", source: ""
+    allergens: ["Fish"], notes: "Great source of omega-3", prepTime: 10, source: ""
   }
 ];
 
@@ -323,7 +331,10 @@ function renderGrid() {
     <div class="recipe-card">
       <div class="card-top" onclick="toggle(${r.id})">
         <h2>${esc(r.name)}</h2>
-        ${r.category ? `<span class="card-cat">${esc(r.category)}</span>` : ''}
+        <div class="card-tags">
+          ${r.prepTime ? `<span class="card-prep">${r.prepTime} min</span>` : ''}
+          ${r.category ? `<span class="card-cat">${esc(r.category)}</span>` : ''}
+        </div>
       </div>
       <div class="card-chips" onclick="toggle(${r.id})">
         ${r.ingredients.map(i => `<span class="chip ${isAllergenIng(i)?'allergen':''}">${esc(i)}</span>`).join('')}
@@ -378,7 +389,7 @@ function pickCat(c, el) {
 }
 
 function clearForm() {
-  ['fName','fIng','fSteps','fNotes','fPaste'].forEach(id => document.getElementById(id).value = '');
+  ['fName','fIng','fSteps','fNotes','fPaste','fPrep'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('preview').style.display = 'none';
   selectedCat = '';
 }
@@ -388,6 +399,7 @@ function saveRecipe() {
   const ings = document.getElementById('fIng').value.trim();
   const steps = document.getElementById('fSteps').value.trim();
   const notes = document.getElementById('fNotes').value.trim();
+  const prepTime = parseInt(document.getElementById('fPrep').value) || 0;
   if (!name || !ings || !steps) { alert('Please fill in name, ingredients, and steps'); return; }
 
   const ingredients = ings.split('\n').map(s=>s.trim()).filter(Boolean);
@@ -396,9 +408,9 @@ function saveRecipe() {
 
   if (editingId) {
     const i = recipes.findIndex(r=>r.id===editingId);
-    if (i>=0) recipes[i] = {...recipes[i], name, category:selectedCat, ingredients, steps:stepList, allergens, notes};
+    if (i>=0) recipes[i] = {...recipes[i], name, category:selectedCat, ingredients, steps:stepList, allergens, notes, prepTime};
   } else {
-    recipes.push({ id:Date.now(), name, category:selectedCat, ingredients, steps:stepList, allergens, notes, source:'' });
+    recipes.push({ id:Date.now(), name, category:selectedCat, ingredients, steps:stepList, allergens, notes, prepTime, source:'' });
   }
   save(); closeModal(); render();
 }
@@ -412,6 +424,7 @@ function editR(id) {
   document.getElementById('fIng').value = r.ingredients.join('\n');
   document.getElementById('fSteps').value = r.steps.join('\n');
   document.getElementById('fNotes').value = r.notes||'';
+  document.getElementById('fPrep').value = r.prepTime||'';
   selectedCat = r.category||'';
   renderCatPicker();
   document.querySelectorAll('.tab')[0].click();
