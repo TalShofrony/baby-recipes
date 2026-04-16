@@ -177,7 +177,7 @@
 </div>
 
 <script>
-const CATEGORIES = ['Muffins','Pancakes','Pie','Soup','Puree','Pasta','Rice','Veggies','Meat','Fish','Snacks','Dessert','Other'];
+const CATEGORIES = ['Muffins','Pancakes','Patties','Pie','Soup','Puree','Pasta','Stir Fry','Baked','Other'];
 
 const ALLERGEN_KEYWORDS = {
   'Dairy': ['milk','cream','butter','cheese','yogurt','yoghurt','ghee','dairy','חלב','שמנת','חמאה','גבינה','יוגורט','קוטג','מוצרלה','פרמזן'],
@@ -608,15 +608,13 @@ function guessCategory(name) {
   const map = {
     'Muffins': ['מאפינ','muffin'],
     'Pancakes': ['פנקייק','pancake','לביבה','לביבות'],
+    'Patties': ['קציצ','patty','pattie','cutlet','fritter','לביבה','קציצות'],
     'Pie': ['פאי','פשטידה','quiche','pie','tart'],
-    'Soup': ['מרק','soup'],
+    'Soup': ['מרק','soup','stew','תבשיל'],
     'Puree': ['פיורה','puree','מחית','מעוך'],
     'Pasta': ['פסטה','pasta','נודלס','אטריות'],
-    'Rice': ['אורז','rice','ריזוטו'],
-    'Fish': ['דג','סלמון','טונה','fish','salmon'],
-    'Meat': ['בשר','עוף','הודו','כבד','meat','chicken','turkey'],
-    'Snacks': ['חטיף','ביס','snack','balls','כדור','bite'],
-    'Dessert': ['עוגה','עוגיה','קינוח','dessert','cake','cookie']
+    'Stir Fry': ['מוקפץ','stir fry','wok','מוקפצת'],
+    'Baked': ['אפוי','bake','roast','casserole','תבנית']
   };
   for (const [cat, kws] of Object.entries(map)) {
     if (kws.some(kw => n.includes(kw))) return cat;
